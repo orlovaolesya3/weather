@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Окно в мир</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+</head>
+<body>
+
+<div class="room">
+    <div class="wall">
+        <!-- Календарь -->
+        <div class="calendar-wall">
+            <div class="nail"></div>
+            <div class="string"></div>
+            <div class="calendar">
+                <div class="calendar-top"><span></span><span></span><span></span></div>
+                <div class="calendar-hole"></div>
+                <div class="cal-month" id="calMonth">ЯНВ</div>
+                <div class="cal-day" id="calDay">1</div>
+                <div class="cal-weekday" id="calWeekday">ПН</div>
+            </div>
+        </div>
+
+        <!-- Окно -->
+        <div class="window-wrapper">
+            <div class="window">
+                <canvas id="streetCanvas"></canvas>
+            </div>
+            <div class="sill">
+                <div class="clock">
+                    <span class="clock-time" id="clockTime">00:00:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Дебаг -->
+    <div class="debug" id="debug">
+        <div class="debug-title">ДЕБАГ</div>
+        <div class="debug-row"><span class="debug-label">Город</span><span class="debug-value" id="dbCity">—</span></div>
+        <div class="debug-row"><span class="debug-label">Погода</span><span class="debug-value" id="dbCond">—</span></div>
+        <div class="debug-row"><span class="debug-label">Темп.</span><span class="debug-value" id="dbTemp">—</span></div>
+        <div class="debug-row"><span class="debug-label">Ветер</span><span class="debug-value" id="dbWind">—</span></div>
+        <div class="debug-row"><span class="debug-label">Влаж.</span><span class="debug-value" id="dbHum">—</span></div>
+        <div class="debug-row"><span class="debug-label">Время</span><span class="debug-value ok" id="dbTime">—</span></div>
+        <div class="debug-row"><span class="debug-label">Небо</span><span class="debug-value" id="dbSky">—</span></div>
+    </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/dom.js"></script>
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/generators.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
