@@ -39,9 +39,13 @@ async function initializeApp() {
     } catch (error) {
         console.error('❌ Ошибка загрузки данных:', error);
         
-        // Демо-режим
-        State.city = 'Владимир';
-        State.country = 'Россия';
+        // Демо-режим с сохранением последнего известного города
+        if (!State.city || State.city === 'Неизвестно') {
+            State.city = 'Москва';
+        }
+        if (!State.country) {
+            State.country = 'Россия';
+        }
         State.condition = 'Переменная облачность';
         State.conditionCode = 1003;
         State.temp = 15;
@@ -74,9 +78,13 @@ async function initializeApp() {
             console.log('🔄 Обновление погоды...');
             
             const location = await getCityByIP();
+            
+            // Обновляем город при каждом запросе
+            State.city = location.city || location.region || State.city;
+            State.country = location.country || State.country;
+            
             const weatherData = await getWeatherData(location.lat, location.lon);
             
-            State.city = location.city || location.region || State.city;
             State.condition = weatherData.condition.text;
             State.conditionCode = weatherData.condition.code;
             State.temp = Math.round(weatherData.temp_c);
@@ -86,7 +94,7 @@ async function initializeApp() {
             const newCategory = getWeatherCategory(State.conditionCode);
             generateWeatherParticles(newCategory);
             
-            console.log(`✅ Погода обновлена: ${State.condition}, ${State.temp}°C`);
+            console.log(`✅ Погода обновлена: ${State.condition}, ${State.temp}°C, ${State.city}`);
         } catch (error) {
             console.warn('⚠️ Не удалось обновить погоду:', error);
         }
@@ -123,5 +131,8 @@ window.addEventListener('offline', () => {
 
 window.addEventListener('online', () => {
     console.log('📡 Соединение восстановлено');
+    // Перезапускаем с чистым состоянием
+    State.city = '';
+    State.country = '';
     setTimeout(() => initializeApp(), 2000);
 });
