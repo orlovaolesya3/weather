@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Тест</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .card {
+            background: #2a2a3e;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .label {
+            color: #888;
+        }
+        .value {
+            color: #4eff4e;
+            font-size: 18px;
+        }
+        button {
+            background: #4eff4e;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #3add3e;
+        }
+        .error {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌍 IP Геолокация</h1>
+    
+    <button onclick="checkIP()">Проверить IP</button>
+    
+    <div class="card" id="result" style="display:none;">
+        <h3>Информация с ipapi.co:</h3>
+        <p><span class="label">IP:</span> <span class="value" id="ip">—</span></p>
+        <p><span class="label">Город:</span> <span class="value" id="city">—</span></p>
+        <p><span class="label">Регион:</span> <span class="value" id="region">—</span></p>
+        <p><span class="label">Страна:</span> <span class="value" id="country">—</span></p>
+        <p><span class="label">Координаты:</span> <span class="value" id="coords">—</span></p>
+    </div>
+    
+    <div id="error" class="error" style="display:none;"></div>
+
+    <script>
+        async function checkIP() {
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            resultDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                
+                document.getElementById('ip').textContent = data.ip || '—';
+                document.getElementById('city').textContent = data.city || '—';
+                document.getElementById('region').textContent = data.region || '—';
+                document.getElementById('country').textContent = data.country_name || '—';
+                document.getElementById('coords').textContent = 
+                    `${data.latitude}, ${data.longitude}` || '—';
+                
+                resultDiv.style.display = 'block';
+                
+                console.log('IP данные:', data);
+                
+            } catch (error) {
+                errorDiv.textContent = 'Ошибка: ' + error.message;
+                errorDiv.style.display = 'block';
+                console.error('Ошибка:', error);
+            }
+        }
+        
+        // Автоматическая проверка при загрузке
+        window.onload = checkIP;
+    </script>
+</body>
+</html>
