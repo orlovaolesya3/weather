@@ -1,317 +1,330 @@
-// Отрисовка сцены
 function drawCloud(cx, cy, w, h, c1, c2) {
     const b = CONFIG.PX * 2;
-    for (let row = 0; row < h; row++) {
-        for (let col = 0; col < w; col++) {
-            const dc = Math.abs(col - w / 2) / (w / 2);
-            const rn = row / h;
-            if ((rn < 0.2 && dc > 0.9) || (rn < 0.4 && dc > 0.95) || (rn > 0.7 && dc > 0.8)) continue;
-            pixelRect(cx + col * b, cy + row * b, b, b, (row + col) & 1 ? c1 : c2);
+    for (let r = 0; r < h; r++)
+        for (let cl = 0; cl < w; cl++) {
+            const dc = Math.abs(cl - w / 2) / (w / 2), rn = r / h;
+            if ((rn < .2 && dc > .9) || (rn < .4 && dc > .95) || (rn > .7 && dc > .8)) continue;
+            pixelRect(cx + cl * b, cy + r * b, b, b, (r + cl) & 1 ? c1 : c2);
         }
-    }
-    
-    const bumps = [
-        [-1, -1, 2, 1],
-        [Math.floor(w / 2) - 2, -2, 3, 2],
-        [w - 2, -1, 2, 1]
-    ];
-    
-    for (const [ox, oy, bw, bh] of bumps) {
-        for (let row = 0; row < bh; row++) {
-            for (let col = 0; col < bw; col++) {
-                pixelRect(cx + (ox + col) * b, cy + oy * b + row * b, b, b, (row + col) & 1 ? c1 : c2);
-            }
-        }
-    }
+    for (const [ox, oy, bw, bh] of [[-1, -1, 2, 1], [Math.floor(w / 2) - 2, -2, 3, 2], [w - 2, -1, 2, 1]])
+        for (let r = 0; r < bh; r++)
+            for (let cl = 0; cl < bw; cl++)
+                pixelRect(cx + (ox + cl) * b, cy + oy * b + r * b, b, b, (r + cl) & 1 ? c1 : c2);
 }
 
-function drawTree(tx, ty, size, sway, isNight) {
-    const b = CONFIG.PX;
-    const trunkW = Math.floor(3 * size);
-    const trunkH = Math.floor(14 * size);
-    const trunkX = R(tx - trunkW * b / 2);
-    const trunkY = R(ty - trunkH * b);
+let sc, sunX, sunY, sunSc, showMoon, showSun, darkness, twilight, glowAlpha;
+let lightningFrames = 0;
+let lightningAlpha = 0;
+let lightningPaths = [];
+let wx, wy, ww, wh;
 
-    // Ствол
-    for (let row = 0; row < trunkH; row++) {
-        const shade = row % 3 ? 1 : 0.85;
-        const [cr, cg, cb] = isNight ? 
-            [40 * shade, 25 * shade, 15 * shade] : 
-            [90 * shade, 55 * shade, 30 * shade];
-        
-        pixelRect(trunkX, trunkY + row * b, trunkW * b, b, 
-            `rgb(${R(cr)},${R(cg)},${R(cb)})`);
-        
-        if (!(row & 3) && trunkW > 2) {
-            pixelRect(trunkX + b, trunkY + row * b, b, b, 
-                `rgb(${R(cr + 10)},${R(cg + 5)},${R(cb + 5)})`);
-        }
-        if (row % 5 === 2 && trunkW > 2) {
-            pixelRect(trunkX + (trunkW - 2) * b, trunkY + row * b, b, b, 
-                `rgb(${R(cr - 5)},${R(cg - 5)},${R(cb - 5)})`);
-        }
+function generateLightning() {
+    const lx = R(wx + Math.random() * ww);
+    const ly = R(wy + Math.random() * wh * .3);
+    const segments = 5 + Math.floor(Math.random() * 8);
+    const path = [{ x: lx, y: ly }];
+    let cx = lx, cy = ly;
+
+    for (let i = 0; i < segments; i++) {
+        cx += (Math.random() - .5) * ww * .15;
+        cy += wh * .06 + Math.random() * wh * .1;
+        path.push({ x: cx, y: cy });
     }
 
-    // Крона
-    const cx = tx + sway * b * 6;
-    const cy = ty - trunkH * b - 2 * b;
-    const cSize = Math.floor(10 * size);
-    const leafColors = isNight ?
-        ['#1a3a1a', '#1f3f1f', '#153015', '#224422'] :
-        ['#3a8a3a', '#4a9a4a', '#2d7d2d', '#459045'];
-
-    // Боковые блоки
-    for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        const dist = cSize * b * (0.4 + Math.sin(i * 1.5) * 0.2);
-        const bx = RG(cx + Math.cos(angle) * dist, b);
-        const by = RG(cy + Math.sin(angle) * dist * 0.6, b);
-        const bSize = Math.floor((3 + Math.sin(i * 2.3) * 1.5) * size);
-        
-        for (let row = 0; row < bSize; row++) {
-            for (let col = 0; col < bSize; col++) {
-                const dx = col - bSize / 2;
-                const dy = row - bSize / 2;
-                if (dx * dx + dy * dy > (bSize / 2) ** 2) continue;
-                pixelRect(bx + col * b, by + row * b, b, b, leafColors[(i + row + col) & 3]);
-            }
-        }
+    const branches = [];
+    for (let b = 0; b < 2; b++) {
+        const idx = 2 + Math.floor(Math.random() * (segments - 2));
+        const bx = path[idx].x + (Math.random() - .5) * ww * .15;
+        const by = path[idx].y + wh * .02;
+        branches.push({ x: bx, y: by, ex: bx + (Math.random() - .5) * ww * .1, ey: by + wh * .08 });
     }
 
-    // Центральный блок
-    for (let row = 0; row < cSize; row++) {
-        for (let col = 0; col < cSize; col++) {
-            const dx = col - cSize / 2;
-            const dy = row - cSize / 2;
-            if (dx * dx + dy * dy > (cSize / 2) ** 2) continue;
-            pixelRect(R(cx - cSize * b / 2 + col * b), R(cy - cSize * b / 2 + row * b), 
-                b, b, leafColors[(row + col) & 3]);
-        }
-    }
+    lightningPaths = [{ path, branches }];
+    lightningFrames = 4;
+    lightningAlpha = 1;
 }
 
 function drawScene() {
     State.frame++;
-    const { W, H } = State;
-    const hour = State.hour;
-    const wind = State.wind;
-    const isNight = hour < 6 || hour >= 20;
-    const isDawn = hour >= 6 && hour < 10;
-    const isDusk = hour >= 17 && hour < 20;
-    const weatherCat = getWeatherCategory(State.conditionCode);
-    const isRainy = weatherCat === 'rain' || weatherCat === 'storm';
-    const isSnowy = weatherCat === 'snow';
-    const showClouds = weatherCat === 'cloudy' || weatherCat === 'partly' || isRainy || isSnowy;
-    const showStars = isNight && weatherCat === 'clear';
+    const { W, H, hour, wind } = State;
+    const hf = hour + State.minute / 60;
 
-    // Выбор цветов неба
-    let skyKey;
-    if (isRainy) skyKey = 'rain';
-    else if (isSnowy) skyKey = 'snow';
-    else if (weatherCat === 'cloudy') skyKey = 'cloudy';
-    else if (isNight) skyKey = 'clear_night';
-    else if (isDawn) skyKey = 'clear_dawn';
-    else if (isDusk) skyKey = 'clear_dusk';
-    else skyKey = 'clear_day';
+    // ===== СЛОЙ 0: КОМНАТА =====
+    roomSprite.draw(DOM.ctx, W, H);
 
-    const skyColors = CONFIG.SKY_COLORS[skyKey];
-    const nightIndex = isNight ? 0 : 1;
-    const skyTop = skyColors.top[nightIndex];
-    const skyBottom = skyColors.bottom[nightIndex];
-    const sunColor = skyColors.sun;
-
-    // Небо
-    const gradient = DOM.ctx.createLinearGradient(0, 0, 0, H * 0.75);
-    gradient.addColorStop(0, skyTop);
-    gradient.addColorStop(1, skyBottom);
-    DOM.ctx.fillStyle = gradient;
-    DOM.ctx.fillRect(0, 0, W, H);
-
-    // Звёзды
-    if (showStars) {
-        for (const star of State.stars) {
-            const flicker = Math.sin(State.frame * star.twinkleSpeed + star.x) * 0.5 + 0.5;
-            const sx = R(star.x / 100 * W);
-            const sy = R(star.y / 100 * H);
-            pixelRect(sx, sy, CONFIG.PX, CONFIG.PX, 
-                `rgb(${180 + R(flicker * star.brightness * 10)},${200 + R(flicker * star.brightness * 5)},255)`);
-            
-            if (star.brightness > 4) {
-                const dimColor = `rgba(255,255,255,${0.1 * flicker})`;
-                for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-                    pixelRect(sx + dx * CONFIG.PX, sy + dy * CONFIG.PX, CONFIG.PX, CONFIG.PX, dimColor);
-                }
-            }
-        }
-    }
-
-    // Горы
-    const groundY = H * 0.78;
-    const mountainColor1 = isNight ? '#1a2a3a' : isRainy ? '#5a6a7a' : isSnowy ? '#c0d0e0' : '#6a8a6a';
-    const mountainColor2 = isNight ? '#152535' : isRainy ? '#4a5a6a' : isSnowy ? '#b0c0d0' : '#5a7a5a';
-
-    for (const [mx, mw, mh] of [[0.15, 0.35, 0.3], [0.5, 0.4, 0.25]]) {
-        const startX = W * mx;
-        const width = W * mw;
-        const height = H * mh;
-        
-        for (let x = 0; x < width; x += CONFIG.PX) {
-            const heightFactor = 1 - Math.abs(x - width / 2) / (width / 2);
-            const peakHeight = RG(height * heightFactor * heightFactor);
-            pixelRect(startX + x, groundY - peakHeight, CONFIG.PX, peakHeight, 
-                (x / CONFIG.PX) & 1 ? mountainColor1 : mountainColor2);
-        }
-    }
-
-    // Земля
-    const groundColor1 = isNight ? '#1a2a1a' : isSnowy ? '#e8f0f0' : '#4a7a3a';
-    const groundColor2 = isNight ? '#152515' : isSnowy ? '#dde8e8' : '#3a6a2a';
+    const roomScale = Math.max(W / roomSprite.width, H / roomSprite.height);
+    const roomW = roomSprite.width * roomScale;
+    const roomH = roomSprite.height * roomScale;
+    const roomX = (W - roomW) / 2;
+    const roomY = (H - roomH) / 2;
     
-    for (let y = groundY; y < H; y += CONFIG.PX) {
-        pixelRect(0, y, W, CONFIG.PX, ((y / CONFIG.PX) & 1) ? groundColor1 : groundColor2);
-    }
+    wx = roomX + CONFIG.WINDOW.x1 * roomScale;
+    wy = roomY + CONFIG.WINDOW.y1 * roomScale;
+    ww = (CONFIG.WINDOW.x2 - CONFIG.WINDOW.x1) * roomScale;
+    wh = (CONFIG.WINDOW.y2 - CONFIG.WINDOW.y1) * roomScale;
 
-    // Дорога
-    const roadY = groundY;
-    for (let y = roadY - 2 * CONFIG.PX; y < roadY + 2 * CONFIG.PX; y += CONFIG.PX) {
-        pixelRect(0, y, W, CONFIG.PX, 
-            ((y / CONFIG.PX) & 1) ? (isNight ? '#2a2a2a' : '#5a5a5a') : (isNight ? '#252525' : '#4a4a4a'));
-    }
+    darkness = 0;
+    if (hf < 4) darkness = 1;
+    else if (hf < 7) darkness = 1 - ((hf - 4) / 3);
+    else if (hf < 19) darkness = 0;
+    else if (hf < 22) darkness = (hf - 19) / 3;
+    else darkness = 1;
 
-    // Разметка
-    const dashWidth = RG(W * 0.04);
-    const dashGap = RG(W * 0.06);
-    for (let x = 0; x < W; x += dashWidth + dashGap) {
-        pixelRect(x, roadY - CONFIG.PX, dashWidth, CONFIG.PX * 2, isNight ? '#444' : '#ddd');
-    }
-
-    // Солнце/Луна
-    const sunProgress = (hour + State.minute / 60) / 24;
-    const sunX = R(W * (0.1 + sunProgress * 0.8));
-    const sunY = R(H * 0.15 + Math.sin(sunProgress * Math.PI) * H * 0.4);
-    const sunRadius = Math.floor(W * 0.05 / CONFIG.PX);
-
-    // Свечение
-    const glowRadius = sunRadius * 3;
-    for (let r = glowRadius; r > 0; r--) {
-        const alpha = 0.03 * (1 - r / glowRadius);
-        if (sunColor.startsWith('#')) {
-            const [cr, cg, cb] = [
-                parseInt(sunColor.slice(1, 3), 16),
-                parseInt(sunColor.slice(3, 5), 16),
-                parseInt(sunColor.slice(5, 7), 16)
-            ];
-            DOM.ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
-        } else {
-            DOM.ctx.fillStyle = sunColor;
-        }
-        DOM.ctx.fillRect(sunX - r * CONFIG.PX, sunY - r * CONFIG.PX, 
-            r * 2 * CONFIG.PX, r * 2 * CONFIG.PX);
-    }
-
-    // Отрисовка солнца/луны
-    if (isNight) {
-        const [mr, mg, mb] = [
-            parseInt(sunColor.slice(1, 3), 16),
-            parseInt(sunColor.slice(3, 5), 16),
-            parseInt(sunColor.slice(5, 7), 16)
-        ];
-        
-        for (let dy = -sunRadius; dy <= sunRadius; dy++) {
-            for (let dx = -sunRadius; dx <= sunRadius; dx++) {
-                if (dx * dx + dy * dy <= sunRadius * sunRadius) {
-                    const shade = (Math.abs(dx) + Math.abs(dy)) % 3 ? 1 : 0.9;
-                    pixelRect(sunX + dx * CONFIG.PX, sunY + dy * CONFIG.PX, CONFIG.PX, CONFIG.PX,
-                        `rgb(${R(mr * shade)},${R(mg * shade)},${R(mb * shade)})`);
-                }
-            }
-        }
-        pixelRect(sunX + 2 * CONFIG.PX, sunY - 2 * CONFIG.PX, CONFIG.PX * 3, CONFIG.PX * 3,
-            `rgb(${mr - 20},${mg - 20},${mb - 10})`);
+    twilight = darkness > 0.03 && darkness < 0.75;
+    
+    if (twilight && showSun) {
+        if (darkness < 0.15) glowAlpha = (0.15 - darkness) / 0.15;
+        else if (darkness < 0.3) glowAlpha = 1;
+        else glowAlpha = 1 - (darkness - 0.3) / 0.45;
     } else {
-        for (let dy = -sunRadius; dy <= sunRadius; dy++) {
-            for (let dx = -sunRadius; dx <= sunRadius; dx++) {
-                if (dx * dx + dy * dy <= sunRadius * sunRadius) {
-                    const shade = (Math.abs(dx) + Math.abs(dy)) & 1 ? 0.85 : 1;
-                    pixelRect(sunX + dx * CONFIG.PX, sunY + dy * CONFIG.PX, CONFIG.PX, CONFIG.PX,
-                        `rgb(${R(255 * shade)},${R(220 * shade)},${R(60 * shade)})`);
-                }
+        glowAlpha = 0;
+    }
+
+    const isDark = darkness > 0.3;
+    const night = darkness > 0.65;
+
+    const wc = getWeatherCategory(State.conditionCode);
+    const rainy = wc === 'rain' || wc === 'storm';
+    const snowy = wc === 'snow';
+    const showCl = wc === 'cloudy' || wc === 'partly' || rainy || snowy;
+    const showSt = darkness > 0.25;
+
+    let sk;
+    if (rainy) sk = 'rain';
+    else if (snowy) sk = 'snow';
+    else if (wc === 'cloudy') sk = 'cloudy';
+    else if (night) sk = 'clear_night';
+    else if (hf >= 4.5 && hf < 6.5) sk = 'clear_dawn';
+    else if (hf >= 19.5 && hf < 21.5) sk = 'clear_dusk';
+    else sk = 'clear_day';
+
+    sc = CONFIG.SKY_COLORS[sk];
+    const ni = night ? 0 : 1;
+
+    const groundScale = ww / groundSprite.width;
+    const groundDrawH = groundSprite.height * groundScale;
+    const gy = wy + wh - groundDrawH;
+
+    DOM.ctx.save();
+    DOM.ctx.beginPath();
+    DOM.ctx.rect(wx, wy, ww, wh);
+    DOM.ctx.clip();
+
+    // ===== СЛОЙ 1: НЕБО =====
+    const grad = DOM.ctx.createLinearGradient(0, wy, 0, wy + wh);
+    grad.addColorStop(0, sc.t[ni]);
+    grad.addColorStop(1, sc.b[ni]);
+    DOM.ctx.fillStyle = grad;
+    DOM.ctx.fillRect(wx, wy, ww, wh);
+
+    const vigGrad = DOM.ctx.createRadialGradient(wx + ww/2, wy + wh*.35, ww*.25, wx + ww/2, wy + wh*.35, ww*.75);
+    vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    vigGrad.addColorStop(0.5, 'rgba(0,0,0,0)');
+    vigGrad.addColorStop(1, 'rgba(0,0,0,0.18)');
+    DOM.ctx.fillStyle = vigGrad;
+    DOM.ctx.fillRect(wx, wy, ww, gy - wy);
+
+    if (showSt) {
+        const starAlpha = Math.min(1, (darkness - 0.25) / 0.5);
+        for (const s of State.stars) {
+            const fl = Math.sin(State.frame * s.twinkleSpeed + s.x) * .5 + .5;
+            const sx = R(wx + s.x / 100 * ww), sy = R(wy + s.y / 100 * wh);
+            const br = s.brightness * starAlpha;
+            const sz = br > 7 ? CONFIG.PX * 2 : CONFIG.PX;
+            pixelRect(sx, sy, sz, sz, `rgba(220,230,255,${starAlpha * (0.6 + fl * 0.4)})`);
+            if (br > 5) {
+                const dc = `rgba(200,210,255,${0.3 * fl * starAlpha})`;
+                for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) 
+                    pixelRect(sx + dx * CONFIG.PX, sy + dy * CONFIG.PX, CONFIG.PX, CONFIG.PX, dc);
             }
-        }
-        
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * Math.PI * 2;
-            const lx = sunX + Math.cos(angle) * sunRadius * CONFIG.PX * 1.5;
-            const ly = sunY + Math.sin(angle) * sunRadius * CONFIG.PX * 1.5;
-            pixelRect(lx - CONFIG.PX, ly - CONFIG.PX, CONFIG.PX * 2, CONFIG.PX * 2, '#ffdd44');
         }
     }
 
-    // Облака
-    if (showClouds && State.clouds.length) {
-        const cloudColor1 = isNight ? '#3a3a5a' : '#ddeeff';
-        const cloudColor2 = isNight ? '#2a2a4a' : '#ccddee';
-        const cloudColor3 = isNight ? '#4a4a6a' : '#eef4ff';
-        
-        for (const cloud of State.clouds) {
-            const cx = R(cloud.x * W + Math.sin(State.frame * 0.005 * cloud.speed + cloud.y * 10) * W * 0.02);
-            const cy = R(cloud.y * H);
-            drawCloud(cx, cy, cloud.w, cloud.h, cloudColor1, cloudColor2);
-            
-            const offsetX = Math.floor(cloud.w * 0.3) * CONFIG.PX * 2;
-            const offsetY = -Math.floor(cloud.h * 0.3) * CONFIG.PX * 2;
-            drawCloud(cx + offsetX, cy + offsetY, Math.floor(cloud.w * 0.7), 
-                Math.floor(cloud.h * 0.6), cloudColor3, cloudColor1);
+    // ===== СЛОЙ 2: СОЛНЦЕ/ЛУНА =====
+    const sunRise = 5, sunSet = 20, moonRise = 21, moonSet = 4;
+    showSun = hf >= sunRise && hf < sunSet;
+    showMoon = hf >= moonRise || hf < moonSet;
+    sunX = sunY = 0;
+
+    if (showSun || showMoon) {
+        let sunProg;
+        if (showSun) {
+            sunProg = (hf - sunRise) / (sunSet - sunRise);
+            sunSc = Math.max(2, Math.floor(ww * .08 / 16));
+        } else {
+            sunProg = hf >= moonRise ? (hf - moonRise) / (24 - moonRise + moonSet) : (24 - moonRise + hf) / (24 - moonRise + moonSet);
+            sunSc = Math.max(2, Math.floor(ww * .09 / 16));
+        }
+        sunX = R(wx + ww * (.1 + sunProg * .8));
+        sunY = R(wy + wh * .82 - Math.sin(sunProg * Math.PI) * wh * .65);
+    }
+
+    // ===== СЛОЙ 3: РОЗОВОЕ СВЕЧЕНИЕ =====
+    if (glowAlpha > 0 && showSun && !rainy && !snowy) {
+        const alpha = glowAlpha * 0.9;
+        const glowR = ww * 0.8;
+        const pinkGrad = DOM.ctx.createRadialGradient(sunX, sunY, sunSc * 16, sunX, sunY, glowR);
+        pinkGrad.addColorStop(0, `rgba(255,180,140,${alpha})`);
+        pinkGrad.addColorStop(0.2, `rgba(255,150,110,${alpha * 0.7})`);
+        pinkGrad.addColorStop(0.5, `rgba(255,120,80,${alpha * 0.4})`);
+        pinkGrad.addColorStop(0.8, `rgba(255,80,60,${alpha * 0.12})`);
+        pinkGrad.addColorStop(1, 'rgba(255,60,40,0)');
+        DOM.ctx.fillStyle = pinkGrad;
+        DOM.ctx.fillRect(wx, wy, ww, wh);
+    }
+
+    // ===== СЛОЙ 4: ТЕЛО СОЛНЦА/ЛУНЫ =====
+    if (showSun || showMoon) {
+        if (showMoon) {
+            if (!sunMoonSprites.draw(DOM.ctx, 'moon', sunX, sunY, sunSc)) {
+                const mR = 16 * sunSc;
+                for (let dy = -mR; dy <= mR; dy += CONFIG.PX)
+                    for (let dx = -mR; dx <= mR; dx += CONFIG.PX)
+                        if (dx * dx + dy * dy <= mR * mR)
+                            pixelRect(sunX + dx, sunY + dy, CONFIG.PX, CONFIG.PX, 'rgb(220,220,255)');
+            }
+        } else {
+            if (!sunMoonSprites.draw(DOM.ctx, 'sun', sunX, sunY, sunSc)) {
+                const sR = 16 * sunSc;
+                for (let dy = -sR; dy <= sR; dy += CONFIG.PX)
+                    for (let dx = -sR; dx <= sR; dx += CONFIG.PX)
+                        if (dx * dx + dy * dy <= sR * sR)
+                            pixelRect(sunX + dx, sunY + dy, CONFIG.PX, CONFIG.PX, '#ffdd44');
+                for (let i = 0; i < 8; i++) {
+                    const a = i / 8 * Math.PI * 2;
+                    pixelRect(sunX + Math.cos(a) * sR * 1.5 - CONFIG.PX * 2, sunY + Math.sin(a) * sR * 1.5 - CONFIG.PX * 2, CONFIG.PX * 4, CONFIG.PX * 4, '#ffdd44');
+                }
+            }
         }
     }
+
+    // ===== СЛОЙ 5: ОБЛАКА =====
+    if (showCl && State.clouds.length) {
+        for (const cl of State.clouds) {
+            const cx = R(wx + cl.x * ww + Math.sin(State.frame * .005 * cl.speed + cl.y * 10) * ww * .02);
+            const cy = R(wy + cl.y * wh);
+            if (!cloudSprites.draw(DOM.ctx, cl.type, cx, cy, 3)) {
+                drawCloud(cx, cy, 6, 3, '#ddeeff', '#ccddee');
+            }
+        }
+    }
+
+    // ===== СЛОЙ 6: РОЗОВАЯ ДЫМКА =====
+    if (glowAlpha > 0 && !rainy && !snowy && wc !== 'cloudy') {
+        const hazeAlpha = glowAlpha * 0.7;
+        const hazeGrad = DOM.ctx.createLinearGradient(0, wy + wh * .4, 0, wy + wh * .9);
+        const isDawn = hf < 12;
+        const hazeColor = isDawn ? '255,170,140' : '255,140,100';
+        hazeGrad.addColorStop(0, `rgba(${hazeColor},0)`);
+        hazeGrad.addColorStop(0.3, `rgba(${hazeColor},${hazeAlpha * 0.3})`);
+        hazeGrad.addColorStop(0.6, `rgba(${hazeColor},${hazeAlpha * 0.6})`);
+        hazeGrad.addColorStop(1, `rgba(${hazeColor},${hazeAlpha})`);
+        DOM.ctx.fillStyle = hazeGrad;
+        DOM.ctx.fillRect(wx, wy + wh * .4, ww, wh * .5);
+    }
+
+    // ===== СЛОЙ 7: ЗЕМЛЯ =====
+    groundSprite.draw(DOM.ctx, wx, gy, ww, groundDrawH);
+    treesSprite.draw(DOM.ctx, wind, wx, gy, ww, groundDrawH);
 
     // Дождь
-    if (isRainy) {
-        const count = weatherCat === 'storm' ? 180 : 100;
-        for (let i = 0; i < count && i < State.rain.length; i++) {
-            const drop = State.rain[i];
-            const fallOffset = (State.frame * 0.03 * drop.speed + drop.phase) % 100;
-            const rx = R(drop.x / 100 * W);
-            const ry = R(((drop.y + fallOffset) % 90) / 100 * H);
-            
-            for (let dy = 0; dy < drop.len * CONFIG.PX; dy += CONFIG.PX) {
-                pixelRect(rx + dy * 0.3, ry + dy, CONFIG.PX, CONFIG.PX,
-                    `rgba(150,180,220,${0.3 + dy / (drop.len * CONFIG.PX) * 0.3})`);
-            }
+    if (rainy) {
+        const cnt = wc === 'storm' ? 180 : 100;
+        for (let i = 0; i < cnt && i < State.rain.length; i++) {
+            const d = State.rain[i];
+            const fall = (State.frame * .03 * d.speed + d.phase) % 100;
+            const rx = R(wx + d.x / 100 * ww), ry = R(wy + ((d.y + fall) % 90) / 100 * wh);
+            for (let dy = 0; dy < d.len * CONFIG.PX; dy += CONFIG.PX)
+                pixelRect(rx + dy * .3, ry + dy, CONFIG.PX, CONFIG.PX, `rgba(150,180,220,${.3 + dy / (d.len * CONFIG.PX) * .3})`);
         }
-    }
 
-    // Снег
-    if (isSnowy) {
-        for (const flake of State.snow) {
-            const fallOffset = (State.frame * 0.015 * flake.speed + flake.phase) % 100;
-            const sx = R((flake.x + Math.sin(State.frame * 0.02 + flake.wobble) * 3) / 100 * W);
-            const sy = R(((flake.y + fallOffset) % 90) / 100 * H);
-            const size = flake.size * CONFIG.PX;
-            
-            pixelRect(sx, sy, size, size, 'rgba(255,255,255,0.8)');
-            
-            if (size > CONFIG.PX * 2) {
-                for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
-                    pixelRect(sx + dx * size, sy + dy * size, size, size, 'rgba(255,255,255,0.4)');
+        if (wc === 'storm') {
+            if (Math.random() < 0.015 && lightningFrames === 0) {
+                generateLightning();
+            }
+
+            if (lightningFrames > 0) {
+                lightningFrames--;
+                lightningAlpha = lightningFrames / 4;
+
+                DOM.ctx.fillStyle = `rgba(255,255,255,${lightningAlpha * 0.15})`;
+                DOM.ctx.fillRect(wx, wy, ww, wh);
+
+                for (const lp of lightningPaths) {
+                    DOM.ctx.strokeStyle = `rgba(255,255,200,${lightningAlpha * 0.9})`;
+                    DOM.ctx.lineWidth = CONFIG.PX;
+                    DOM.ctx.beginPath();
+                    DOM.ctx.moveTo(lp.path[0].x, lp.path[0].y);
+                    for (let i = 1; i < lp.path.length; i++) {
+                        DOM.ctx.lineTo(lp.path[i].x, lp.path[i].y);
+                    }
+                    DOM.ctx.stroke();
+
+                    for (const br of lp.branches) {
+                        DOM.ctx.strokeStyle = `rgba(255,255,200,${lightningAlpha * 0.5})`;
+                        DOM.ctx.lineWidth = CONFIG.PX / 2;
+                        DOM.ctx.beginPath();
+                        DOM.ctx.moveTo(br.x, br.y);
+                        DOM.ctx.lineTo(br.ex, br.ey);
+                        DOM.ctx.stroke();
+                    }
                 }
             }
         }
     }
 
-    // Деревья
-    for (const treeConfig of CONFIG.TREES) {
-        const sway = Math.sin(State.frame * 0.015 + treeConfig.x * 10) * wind * 0.003;
-        drawTree(R(treeConfig.x * W), R(groundY), treeConfig.size, sway, isNight);
+    if (snowy) for (const sf of State.snow) {
+        const fall = (State.frame * .015 * sf.speed + sf.phase) % 100;
+        const sx = R(wx + (sf.x + Math.sin(State.frame * .02 + sf.wobble) * 3) / 100 * ww);
+        const sy = R(wy + ((sf.y + fall) % 90) / 100 * wh);
+        const sz = sf.size * CONFIG.PX;
+        pixelRect(sx, sy, sz, sz, 'rgba(255,255,255,.8)');
+        if (sz > CONFIG.PX * 2) for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]])
+            pixelRect(sx + dx * sz, sy + dy * sz, sz, sz, 'rgba(255,255,255,.4)');
     }
 
-    // Блик на стекле
-    for (let y = 0; y < H * 0.3; y += CONFIG.PX * 2) {
-        for (let x = 0; x < W * 0.3; x += CONFIG.PX * 2) {
-            if (!(((x / CONFIG.PX + y / CONFIG.PX) & 3))) {
-                const alpha = 0.04 * (1 - x / (W * 0.3)) * (1 - y / (H * 0.3));
-                pixelRect(x, y, CONFIG.PX * 2, CONFIG.PX * 2, `rgba(255,255,255,${alpha})`);
-            }
+    // ===== СЛОЙ 8: ЗАТЕМНЕНИЕ ОКНА =====
+    if (darkness > 0.1) {
+        DOM.ctx.fillStyle = `rgba(5, 5, 25, ${(darkness - 0.1) * 0.78})`;
+        DOM.ctx.fillRect(wx, wy, ww, wh);
+    }
+
+    // ===== СЛОЙ 9: СВЕЧЕНИЕ =====
+    if ((showSun || showMoon) && sunX > 0) {
+        const glowR = (showMoon ? 100 : 64) * sunSc;
+        for (let r = glowR; r > 0; r -= CONFIG.PX * 2) {
+            const a = .04 * (1 - r / glowR);
+            const color = showMoon ? '180,190,240' : '255,240,180';
+            DOM.ctx.fillStyle = `rgba(${color},${a})`;
+            DOM.ctx.beginPath(); DOM.ctx.arc(sunX, sunY, r, 0, Math.PI * 2); DOM.ctx.fill();
         }
+    }
+
+    if (darkness < 0.2) {
+        for (let y = 0; y < wh * .3; y += CONFIG.PX * 2)
+            for (let x = 0; x < ww * .3; x += CONFIG.PX * 2)
+                if (!(((x / CONFIG.PX + y / CONFIG.PX) & 3)))
+                    pixelRect(wx + x, wy + y, CONFIG.PX * 2, CONFIG.PX * 2, `rgba(255,255,255,${.04 * (1 - x / (ww * .3)) * (1 - y / (wh * .3))})`);
+    }
+
+    DOM.ctx.restore();
+
+    // ===== СВЕТ ОТ ВЕРХНИХ УГЛОВ ЭКРАНА =====
+    if (switchSprite.state) {
+        const lightGrad1 = DOM.ctx.createRadialGradient(0, 0, 0, 0, 0, W * .8);
+        lightGrad1.addColorStop(0, 'rgba(255,230,170,0.25)');
+        lightGrad1.addColorStop(0.2, 'rgba(255,210,140,0.15)');
+        lightGrad1.addColorStop(0.5, 'rgba(255,180,100,0.05)');
+        lightGrad1.addColorStop(1, 'rgba(255,140,60,0)');
+        DOM.ctx.fillStyle = lightGrad1;
+        DOM.ctx.fillRect(0, 0, W, H);
+        
+        const lightGrad2 = DOM.ctx.createRadialGradient(W, 0, 0, W, 0, W * .8);
+        lightGrad2.addColorStop(0, 'rgba(255,230,170,0.25)');
+        lightGrad2.addColorStop(0.2, 'rgba(255,210,140,0.15)');
+        lightGrad2.addColorStop(0.5, 'rgba(255,180,100,0.05)');
+        lightGrad2.addColorStop(1, 'rgba(255,140,60,0)');
+        DOM.ctx.fillStyle = lightGrad2;
+        DOM.ctx.fillRect(0, 0, W, H);
     }
 }

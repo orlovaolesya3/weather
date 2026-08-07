@@ -1,36 +1,46 @@
-// Конфигурация приложения
 const CONFIG = {
-    // Вставь свой API ключ с https://openweathermap.org/api
-    API_KEY: '3fe3a80caf1eabf5567ac15cad47aaa3',
-    
+    API_KEY: '',
     PX: 4,
+    
+    // Координаты окна на спрайте комнаты (1776×886)
+    WINDOW: {
+        x1: 415, y1: 120,  // левый верхний угол
+        x2: 1400, y2: 696   // правый нижний угол
+    },
     
     MONTHS: ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'],
     WEEKDAYS: ['ВС','ПН','ВТ','СР','ЧТ','ПТ','СБ'],
     
     TREES: [
-        { x: 0.08, size: 1.0 },
-        { x: 0.20, size: 0.7 },
-        { x: 0.78, size: 1.1 },
-        { x: 0.92, size: 0.75 }
+        { x: 0.08, s: 1.0 },
+        { x: 0.20, s: 0.7 },
+        { x: 0.78, s: 1.1 },
+        { x: 0.92, s: 0.75 }
     ],
     
     WEATHER_CONFIG: {
-        clear:    { clouds: 0,  rain: 0,   snow: 0 },
-        partly:   { clouds: 4,  rain: 0,   snow: 0 },
-        cloudy:   { clouds: 12, rain: 0,   snow: 0 },
-        rain:     { clouds: 14, rain: 120, snow: 0 },
-        storm:    { clouds: 16, rain: 180, snow: 0 },
-        snow:     { clouds: 14, rain: 0,   snow: 80 }
+        clear:    { c: 0,  r: 0,   s: 0 },
+        partly:   { c: 4,  r: 0,   s: 0 },
+        cloudy:   { c: 12, r: 0,   s: 0 },
+        rain:     { c: 14, r: 120, s: 0 },
+        storm:    { c: 16, r: 180, s: 0 },
+        snow:     { c: 14, r: 0,   s: 80 }
     },
     
     SKY_COLORS: {
-        rain:       { top: ['#1a1a2e','#5a6a8a'], bottom: ['#0d0d1a','#8a9aaa'], sun: '#ffcc88' },
-        snow:       { top: ['#2a3a4a','#c8d8e8'], bottom: ['#1a2a3a','#dde8f0'], sun: '#ffeecc' },
-        cloudy:     { top: ['#2a2a3a','#8a9aaa'], bottom: ['#1a1a2a','#b0c0d0'], sun: '#ffddaa' },
-        clear_night:{ top: ['#0a0a2a','#0a0a2a'], bottom: ['#1a1a3a','#1a1a3a'], sun: '#dddd88' },
-        clear_dawn: { top: ['#ff8866','#ff8866'], bottom: ['#ffcc88','#ffcc88'], sun: '#ffdd44' },
-        clear_dusk: { top: ['#ff6644','#ff6644'], bottom: ['#ff9966','#ff9966'], sun: '#ffcc44' },
-        clear_day:  { top: ['#4a90d9','#4a90d9'], bottom: ['#87CEEB','#87CEEB'], sun: '#ffdd44' }
+        rain:       { t: ['#1a1a30','#8a9aaa'], b: ['#0d0d1a','#a0b0c0'], s: '#ccbb88' },
+        snow:       { t: ['#2a3a4a','#c0d0e0'], b: ['#1a2a3a','#d8e4ee'], s: '#eeeedd' },
+        cloudy:     { t: ['#2a2a3a','#a0b8c8'], b: ['#1a1a2a','#c0d0dd'], s: '#ddccaa' },
+        clear_night:{ t: ['#05051a','#05051a'], b: ['#0a1030','#0a1030'], s: '#ccccdd' },
+        clear_dawn: { t: ['#8899bb','#8899bb'], b: ['#eeccaa','#eeccaa'], s: '#ffcc88' },
+        clear_dusk: { t: ['#667799','#667799'], b: ['#dd9977','#dd9977'], s: '#ffaa66' },
+        clear_day:  { t: ['#7799cc','#7799cc'], b: ['#aac8ee','#aac8ee'], s: '#ffee55' }
+    },
+    
+    async loadApiKey() {
+        try {
+            const r = await fetch('apikey.txt');
+            if (r.ok) this.API_KEY = (await r.text()).trim();
+        } catch(e) {}
     }
 };
