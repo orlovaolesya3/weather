@@ -1,138 +1,122 @@
-// Главный модуль приложения
-async function initializeApp() {
-    console.log('🚀 Запуск приложения...');
-    
-    initCanvas();
-    resizeCanvas();
-    generateStars();
-    
-    DOM.dbCity.textContent = 'Определение...';
-    DOM.dbCond.textContent = 'Загрузка...';
-
+// API функции для OpenWeatherMap
+async function getCityByIP() {
     try {
-        // Получаем местоположение по IP
-        console.log('📍 Определение местоположения по IP...');
-        const location = await getCityByIP();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 4000);
+        const response = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+        clearTimeout(timeout);
         
-        // Берём город напрямую из ipapi.co
-        State.city = location.city || location.region || 'Неизвестно';
-        State.country = location.country || '';
-        State.region = location.region || '';
+        if (!response.ok) throw new Error('IP API error');
         
-        console.log(`📍 Определено: ${State.city}, ${State.country}`);
-        console.log(`🌍 Координаты: ${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}`);
-        
-        // Получаем погоду по координатам
-        console.log('🌤️ Загрузка погоды...');
-        const weatherData = await getWeatherData(location.lat, location.lon);
-        
-        State.condition = weatherData.condition.text;
-        State.conditionCode = weatherData.condition.code;
-        State.temp = Math.round(weatherData.temp_c);
-        State.wind = Math.round(weatherData.wind_kph / 3.6);
-        State.humidity = weatherData.humidity;
-        State.cloudCover = weatherData.cloud_cover || 0;
-        State.loaded = true;
-        
-        console.log(`🌡️ Погода: ${State.condition}, ${State.temp}°C`);
-        
+        const data = await response.json();
+        return {
+            city: data.city || 'Moscow',
+            country: data.country_name || 'Russia',
+            region: data.region || '',
+            lat: data.latitude,
+            lon: data.longitude
+        };
     } catch (error) {
-        console.error('❌ Ошибка загрузки данных:', error);
-        
-        // Демо-режим с сохранением последнего известного города
-        if (!State.city || State.city === 'Неизвестно') {
-            State.city = 'Москва';
-        }
-        if (!State.country) {
-            State.country = 'Россия';
-        }
-        State.condition = 'Переменная облачность';
-        State.conditionCode = 1003;
-        State.temp = 15;
-        State.wind = 3;
-        State.humidity = 65;
-        State.loaded = false;
-        
-        console.log('📦 Используются демо-данные');
+        console.warn('IP detection failed, using default:', error);
+        return { 
+            city: 'Moscow', 
+            country: 'Russia',
+            region: 'Moscow',
+            lat: 55.7558, 
+            lon: 37.6173 
+        };
     }
-
-    // Генерируем частицы по погоде
-    const weatherCategory = getWeatherCategory(State.conditionCode);
-    generateWeatherParticles(weatherCategory);
-    
-    console.log(`🎨 Категория погоды: ${weatherCategory}`);
-
-    // Обновляем интерфейс
-    updateDisplay();
-    updateDebug();
-    
-    // Запускаем обновление времени каждую секунду
-    setInterval(() => {
-        updateDisplay();
-        updateDebug();
-    }, 1000);
-
-    // Каждые 30 минут обновляем погоду
-    setInterval(async () => {
-        try {
-            console.log('🔄 Обновление погоды...');
-            
-            const location = await getCityByIP();
-            
-            // Обновляем город при каждом запросе
-            State.city = location.city || location.region || State.city;
-            State.country = location.country || State.country;
-            
-            const weatherData = await getWeatherData(location.lat, location.lon);
-            
-            State.condition = weatherData.condition.text;
-            State.conditionCode = weatherData.condition.code;
-            State.temp = Math.round(weatherData.temp_c);
-            State.wind = Math.round(weatherData.wind_kph / 3.6);
-            State.humidity = weatherData.humidity;
-            
-            const newCategory = getWeatherCategory(State.conditionCode);
-            generateWeatherParticles(newCategory);
-            
-            console.log(`✅ Погода обновлена: ${State.condition}, ${State.temp}°C, ${State.city}`);
-        } catch (error) {
-            console.warn('⚠️ Не удалось обновить погоду:', error);
-        }
-    }, 30 * 60 * 1000);
-
-    // Запускаем анимацию
-    console.log('🎬 Запуск анимации...');
-    
-    function animationLoop() {
-        drawScene();
-        requestAnimationFrame(animationLoop);
-    }
-    
-    animationLoop();
-    
-    console.log('✅ Приложение запущено!');
 }
 
-// Обработчики событий
-window.addEventListener('resize', () => {
-    resizeCanvas();
-});
+async function getWeatherData(city) {
+    if (CONFIG.API_KEY === 'ТВОЙ_КЛЮЧ_ОТ_OPENWEATHERMAP') {
+        throw new Error('API key missing');
+    }
+    
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${CONFIG.API_KEY}&units=metric&lang=ru`;
+    
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeout);
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        return {
+            condition: {
+                text: data.weather[0].description,
+                code: data.weather[0].id,
+                icon: data.weather[0].icon
+            },
+            temp_c: data.main.temp,
+            feels_like: data.main.feels_like,
+            wind_kph: data.wind.speed * 3.6, // Конвертация м/с в км/ч
+            wind_speed: data.wind.speed, // м/с
+            humidity: data.main.humidity,
+            pressure: data.main.pressure,
+            clouds: data.clouds.all,
+            visibility: data.visibility,
+            city_name: data.name,
+            country: data.sys.country
+        };
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('Request timeout');
+        }
+        throw error;
+    }
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 Страница загружена');
-    initializeApp();
-});
-
-// Обработка проблем с сетью
-window.addEventListener('offline', () => {
-    console.warn('📡 Соединение потеряно');
-    DOM.dbCond.textContent = 'Офлайн';
-});
-
-window.addEventListener('online', () => {
-    console.log('📡 Соединение восстановлено');
-    // Перезапускаем с чистым состоянием
-    State.city = '';
-    State.country = '';
-    setTimeout(() => initializeApp(), 2000);
-});
+// Функция для получения погоды по координатам (запасной вариант)
+async function getWeatherByCoords(lat, lon) {
+    if (CONFIG.API_KEY === 'ТВОЙ_КЛЮЧ_ОТ_OPENWEATHERMAP') {
+        throw new Error('API key missing');
+    }
+    
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${CONFIG.API_KEY}&units=metric&lang=ru`;
+    
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeout);
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        return {
+            condition: {
+                text: data.weather[0].description,
+                code: data.weather[0].id,
+                icon: data.weather[0].icon
+            },
+            temp_c: data.main.temp,
+            feels_like: data.main.feels_like,
+            wind_kph: data.wind.speed * 3.6,
+            wind_speed: data.wind.speed,
+            humidity: data.main.humidity,
+            pressure: data.main.pressure,
+            clouds: data.clouds.all,
+            visibility: data.visibility,
+            city_name: data.name,
+            country: data.sys.country
+        };
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('Request timeout');
+        }
+        throw error;
+    }
+}

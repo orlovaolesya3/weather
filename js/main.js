@@ -1,115 +1,117 @@
 // Главный модуль приложения
 async function initializeApp() {
-    console.log('🚀 Запуск приложения...');
+    console.log('🚀 Starting Pixel Weather App...');
     
     initCanvas();
     resizeCanvas();
     generateStars();
-    
-    DOM.dbCity.textContent = 'Определение...';
-    DOM.dbCond.textContent = 'Загрузка...';
 
     try {
-        // Получаем местоположение по IP
-        console.log('📍 Определение местоположения по IP...');
-        let location = await getCityByIP();
+        // 1. Получаем местоположение по IP
+        console.log('📍 Detecting location...');
+        const location = await getCityByIP();
+        console.log('📍 Location:', location);
         
-        // Если город не определился или это Москва (часто бывает по IP),
-        // пробуем получить точное название по координатам
-        if (!location.city || location.city === 'Москва' || location.city === 'Moscow') {
-            console.log('🎯 Уточняем город по координатам...');
-            const preciseCity = await getCityFromCoords(location.lat, location.lon);
-            if (preciseCity !== 'Неизвестно') {
-                location.city = preciseCity;
+        // Сохраняем информацию о местоположении
+        State.city = location.city;
+        State.country = location.country;
+        
+        let weatherData;
+        
+        // 2. Пробуем получить погоду по названию города
+        try {
+            console.log('🌤️ Fetching weather for:', location.city);
+            weatherData = await getWeatherData(location.city);
+        } catch (cityError) {
+            console.warn('⚠️ Failed to get weather by city name, trying coordinates...');
+            
+            // 3. Если не получилось по городу, пробуем по координатам
+            try {
+                console.log('🌤️ Fetching weather by coordinates:', location.lat, location.lon);
+                weatherData = await getWeatherByCoords(location.lat, location.lon);
+                
+                // Обновляем название города из ответа API
+                if (weatherData.city_name) {
+                    State.city = weatherData.city_name;
+                }
+            } catch (coordsError) {
+                throw new Error('All weather APIs failed');
             }
         }
         
-        State.city = location.city;
-        State.country = location.country;
-        State.region = location.region || '';
-        
-        console.log(`📍 Определено: ${State.city}, ${State.region || State.country}`);
-        console.log(`🌍 Координаты: ${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}`);
-        
-        // Получаем погоду по координатам
-        console.log('🌤️ Загрузка погоды...');
-        const weatherData = await getWeatherData(location.lat, location.lon);
-        
+        // 4. Обновляем состояние с данными погоды
         State.condition = weatherData.condition.text;
         State.conditionCode = weatherData.condition.code;
         State.temp = Math.round(weatherData.temp_c);
-        State.wind = Math.round(weatherData.wind_kph / 3.6);
+        State.wind = Math.round(weatherData.wind_speed); // Используем м/с
         State.humidity = weatherData.humidity;
-        State.cloudCover = weatherData.cloud_cover || 0;
         State.loaded = true;
         
-        console.log(`🌡️ Погода: ${State.condition}, ${State.temp}°C`);
+        console.log('✅ Weather loaded successfully:', {
+            city: State.city,
+            condition: State.condition,
+            temp: State.temp,
+            wind: State.wind,
+            humidity: State.humidity
+        });
         
     } catch (error) {
-        console.error('❌ Ошибка загрузки данных:', error);
+        console.error('❌ Failed to load weather:', error);
         
-        State.city = State.city || 'Владимир';
-        State.country = State.country || 'Россия';
+        // Демо-данные для тестирования
         State.condition = 'Переменная облачность';
-        State.conditionCode = 1003;
-        State.temp = 15;
+        State.conditionCode = 802; // scattered clouds
+        State.temp = 22;
         State.wind = 3;
-        State.humidity = 65;
+        State.humidity = 55;
         State.loaded = false;
         
-        console.log('📦 Используются демо-данные');
+        console.log('📦 Using demo data');
     }
 
-    // Генерируем частицы по погоде
+    // Генерируем частицы в зависимости от погоды
     const weatherCategory = getWeatherCategory(State.conditionCode);
+    console.log('🎨 Weather category:', weatherCategory);
     generateWeatherParticles(weatherCategory);
-    
-    console.log(`🎨 Категория погоды: ${weatherCategory}`);
 
-    // Обновляем интерфейс
+    // Обновляем отображение
     updateDisplay();
     updateDebug();
     
-    // Запускаем обновление времени каждую секунду
+    // Запускаем обновление каждую секунду
     setInterval(() => {
         updateDisplay();
         updateDebug();
     }, 1000);
-
-    // Каждые 30 минут обновляем погоду
+    
+    // Автообновление погоды каждые 30 минут
     setInterval(async () => {
+        console.log('🔄 Auto-refreshing weather...');
         try {
-            console.log('🔄 Обновление погоды...');
-            
-            const location = await getCityByIP();
-            const weatherData = await getWeatherData(location.lat, location.lon);
-            
+            const weatherData = await getWeatherData(State.city);
             State.condition = weatherData.condition.text;
             State.conditionCode = weatherData.condition.code;
             State.temp = Math.round(weatherData.temp_c);
-            State.wind = Math.round(weatherData.wind_kph / 3.6);
+            State.wind = Math.round(weatherData.wind_speed);
             State.humidity = weatherData.humidity;
             
-            const newCategory = getWeatherCategory(State.conditionCode);
-            generateWeatherParticles(newCategory);
+            const weatherCategory = getWeatherCategory(State.conditionCode);
+            generateWeatherParticles(weatherCategory);
             
-            console.log(`✅ Погода обновлена: ${State.condition}, ${State.temp}°C`);
+            console.log('✅ Weather refreshed');
         } catch (error) {
-            console.warn('⚠️ Не удалось обновить погоду:', error);
+            console.warn('⚠️ Failed to refresh weather:', error);
         }
-    }, 30 * 60 * 1000);
+    }, 30 * 60 * 1000); // 30 минут
 
     // Запускаем анимацию
-    console.log('🎬 Запуск анимации...');
-    
     function animationLoop() {
         drawScene();
         requestAnimationFrame(animationLoop);
     }
     
     animationLoop();
-    
-    console.log('✅ Приложение запущено!');
+    console.log('🎮 Animation started');
 }
 
 // Обработчики событий
@@ -117,18 +119,38 @@ window.addEventListener('resize', () => {
     resizeCanvas();
 });
 
+window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
+});
+
+// Запуск приложения
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 Страница загружена');
-    initializeApp();
+    console.log('📄 DOM loaded, initializing app...');
+    initializeApp().catch(error => {
+        console.error('💥 Fatal error:', error);
+    });
 });
 
-// Обработка проблем с сетью
-window.addEventListener('offline', () => {
-    console.warn('📡 Соединение потеряно');
-    DOM.dbCond.textContent = 'Офлайн';
-});
-
-window.addEventListener('online', () => {
-    console.log('📡 Соединение восстановлено');
-    setTimeout(() => initializeApp(), 2000);
-});
+// Дополнительные утилиты для отладки
+window.debugApp = {
+    getState: () => State,
+    getConfig: () => CONFIG,
+    refreshWeather: async () => {
+        try {
+            const weatherData = await getWeatherData(State.city);
+            State.condition = weatherData.condition.text;
+            State.conditionCode = weatherData.condition.code;
+            State.temp = Math.round(weatherData.temp_c);
+            State.wind = Math.round(weatherData.wind_speed);
+            State.humidity = weatherData.humidity;
+            
+            const weatherCategory = getWeatherCategory(State.conditionCode);
+            generateWeatherParticles(weatherCategory);
+            
+            updateDebug();
+            console.log('✅ Manual weather refresh successful');
+        } catch (error) {
+            console.error('❌ Manual refresh failed:', error);
+        }
+    }
+};

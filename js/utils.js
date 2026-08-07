@@ -7,15 +7,34 @@ function pixelRect(x, y, w, h, color) {
     DOM.ctx.fillRect(R(x), R(y), R(w), R(h));
 }
 
+// Обновленная функция для кодов погоды OpenWeatherMap
 function getWeatherCategory(code) {
-    if (code === 1000) return 'clear';
-    if (code === 1003) return 'partly';
-    if ((code >= 1006 && code <= 1030) || code === 1135 || code === 1147) return 'cloudy';
-    if ((code >= 1063 && code <= 1201) || (code >= 1240 && code <= 1246) || 
-        code === 1273 || code === 1276) return 'rain';
-    if ((code >= 1066 && code <= 1237 && code !== 1087) || 
-        (code >= 1249 && code <= 1264) || code === 1279 || code === 1282) return 'snow';
-    if ([1087, 1273, 1276, 1279, 1282].includes(code)) return 'storm';
+    // OpenWeatherMap weather codes: https://openweathermap.org/weather-conditions
+    
+    // Thunderstorm (200-232)
+    if (code >= 200 && code < 300) return 'storm';
+    
+    // Drizzle (300-321)
+    if (code >= 300 && code < 400) return 'rain';
+    
+    // Rain (500-531)
+    if (code >= 500 && code < 600) return 'rain';
+    
+    // Snow (600-622)
+    if (code >= 600 && code < 700) return 'snow';
+    
+    // Atmosphere (701-781)
+    if (code >= 701 && code < 800) return 'cloudy';
+    
+    // Clear (800)
+    if (code === 800) return 'clear';
+    
+    // Few clouds (801)
+    if (code === 801) return 'partly';
+    
+    // Clouds (802-804)
+    if (code >= 802 && code <= 804) return 'cloudy';
+    
     return 'cloudy';
 }
 
