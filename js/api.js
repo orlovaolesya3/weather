@@ -1,14 +1,8 @@
 // API функции
 async function getCityByIP() {
     try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 4000);
-        
-        // Используем ipinfo.io вместо ipapi.co
-        const response = await fetch('https://ipinfo.io/json', { 
-            signal: controller.signal 
-        });
-        clearTimeout(timeout);
+        // Простой запрос без AbortController (как в тестовой странице)
+        const response = await fetch('https://ipinfo.io/json');
         
         if (!response.ok) throw new Error('IP API error');
         
@@ -38,92 +32,70 @@ async function getCityByIP() {
 
 async function getWeatherData(city) {
     if (CONFIG.API_KEY === 'ТВОЙ_КЛЮЧ_ОТ_OPENWEATHERMAP') {
-        throw new Error('API key missing');
+        throw new Error('API key missing - using demo data');
     }
     
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${CONFIG.API_KEY}&units=metric&lang=ru`;
     
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(url);
     
-    try {
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        return {
-            condition: {
-                text: data.weather[0].description,
-                code: data.weather[0].id,
-                icon: data.weather[0].icon
-            },
-            temp_c: data.main.temp,
-            feels_like: data.main.feels_like,
-            wind_kph: data.wind.speed * 3.6,
-            wind_speed: data.wind.speed,
-            humidity: data.main.humidity,
-            pressure: data.main.pressure,
-            clouds: data.clouds.all,
-            visibility: data.visibility,
-            city_name: data.name,
-            country: data.sys.country
-        };
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            throw new Error('Request timeout');
-        }
-        throw error;
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
     }
+    
+    const data = await response.json();
+    
+    return {
+        condition: {
+            text: data.weather[0].description,
+            code: data.weather[0].id,
+            icon: data.weather[0].icon
+        },
+        temp_c: data.main.temp,
+        feels_like: data.main.feels_like,
+        wind_kph: data.wind.speed * 3.6,
+        wind_speed: data.wind.speed,
+        humidity: data.main.humidity,
+        pressure: data.main.pressure,
+        clouds: data.clouds.all,
+        visibility: data.visibility,
+        city_name: data.name,
+        country: data.sys.country
+    };
 }
 
 async function getWeatherByCoords(lat, lon) {
-    if (CONFIG.API_KEY === 'ТВОЙ_КЛЮЧ_ОТ_OPENWEATHERMAP') {
-        throw new Error('API key missing');
+    if (CONFIG.API_KEY === '3fe3a80caf1eabf5567ac15cad47aaa3') {
+        throw new Error('API key missing - using demo data');
     }
     
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${CONFIG.API_KEY}&units=metric&lang=ru`;
     
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(url);
     
-    try {
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        return {
-            condition: {
-                text: data.weather[0].description,
-                code: data.weather[0].id,
-                icon: data.weather[0].icon
-            },
-            temp_c: data.main.temp,
-            feels_like: data.main.feels_like,
-            wind_kph: data.wind.speed * 3.6,
-            wind_speed: data.wind.speed,
-            humidity: data.main.humidity,
-            pressure: data.main.pressure,
-            clouds: data.clouds.all,
-            visibility: data.visibility,
-            city_name: data.name,
-            country: data.sys.country
-        };
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            throw new Error('Request timeout');
-        }
-        throw error;
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
     }
+    
+    const data = await response.json();
+    
+    return {
+        condition: {
+            text: data.weather[0].description,
+            code: data.weather[0].id,
+            icon: data.weather[0].icon
+        },
+        temp_c: data.main.temp,
+        feels_like: data.main.feels_like,
+        wind_kph: data.wind.speed * 3.6,
+        wind_speed: data.wind.speed,
+        humidity: data.main.humidity,
+        pressure: data.main.pressure,
+        clouds: data.clouds.all,
+        visibility: data.visibility,
+        city_name: data.name,
+        country: data.sys.country
+    };
 }
