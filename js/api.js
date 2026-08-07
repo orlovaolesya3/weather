@@ -1,20 +1,28 @@
-// API функции для OpenWeatherMap
+// API функции
 async function getCityByIP() {
     try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 4000);
-        const response = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+        
+        // Используем ipinfo.io вместо ipapi.co
+        const response = await fetch('https://ipinfo.io/json', { 
+            signal: controller.signal 
+        });
         clearTimeout(timeout);
         
         if (!response.ok) throw new Error('IP API error');
         
         const data = await response.json();
+        
+        // ipinfo.io возвращает loc как строку "lat,lon"
+        const [lat, lon] = (data.loc || '55.7558,37.6173').split(',').map(Number);
+        
         return {
             city: data.city || 'Moscow',
             region: data.region || '',
-            country: data.country_name || 'Russia',
-            lat: data.latitude,
-            lon: data.longitude
+            country: data.country || 'Russia',
+            lat: lat,
+            lon: lon
         };
     } catch (error) {
         console.warn('IP detection failed, using default:', error);
