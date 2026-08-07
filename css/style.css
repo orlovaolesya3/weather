@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --bg-room: #2a2a3d;
+    --bg-wall: #38385a;
+    --border-color: #4a4a6e;
+    --wood-dark: #4a3828;
+    --wood-mid: #6b5540;
+    --wood-light: #8d7260;
+    --text-glow: #00ff88;
+    --pixel-size: 4px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #16162a;
+    padding: 24px;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.room {
+    position: relative;
+    width: min(900px, 100%);
+    background: var(--bg-room);
+    padding: 28px;
+    box-shadow: 
+        0 0 0 3px #3d3d5c,
+        0 0 0 6px #252540,
+        0 20px 60px rgba(0,0,0,0.5);
+    image-rendering: pixelated;
+}
+
+.wall {
+    position: relative;
+    background: var(--bg-wall);
+    padding: 28px;
+    border: 3px solid var(--border-color);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.3);
+}
+
+.window-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/10;
+}
+
+.window {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: 8px solid var(--wood-dark);
+    box-shadow: 
+        inset 0 0 80px rgba(0,0,0,0.3),
+        0 8px 32px rgba(0,0,0,0.4);
+    image-rendering: pixelated;
+}
+
+#streetCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+}
+
+/* Подоконник */
+.sill {
+    position: absolute;
+    bottom: -26px;
+    left: -30px;
+    right: -30px;
+    height: 42px;
+    background: linear-gradient(180deg, var(--wood-mid), var(--wood-dark));
+    z-index: 10;
+    border: 3px solid #3a2820;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 20px;
+}
+
+.sill::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: linear-gradient(180deg, var(--wood-light), var(--wood-mid));
+    border: 2px solid #5a4030;
+    pointer-events: none;
+}
+
+/* Часы */
+.clock {
+    position: relative;
+    z-index: 1;
+    background: #1e1e35;
+    padding: 6px 12px;
+    border: 3px solid #5a5a80;
+    box-shadow: 
+        3px 3px 0 rgba(0,0,0,0.4),
+        0 0 20px rgba(0,0,0,0.3);
+    image-rendering: pixelated;
+}
+
+.clock-time {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--text-glow);
+    text-shadow: 0 0 10px rgba(0,255,136,0.4);
+    letter-spacing: 3px;
+    white-space: nowrap;
+}
+
+/* Календарь на стене */
+.calendar-wall {
+    position: absolute;
+    left: -150px;
+    top: 8%;
+    z-index: 20;
+    image-rendering: pixelated;
+}
+
+.nail {
+    width: 10px;
+    height: 10px;
+    background: #999;
+    border: 2px solid #777;
+    border-radius: 50%;
+    margin: 0 auto 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.nail::after {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 3px;
+    background: #bbb;
+    border-radius: 50%;
+    margin: 2px auto 0;
+}
+
+.string {
+    width: 2px;
+    height: 12px;
+    background: #9b8b70;
+    margin: 0 auto;
+}
+
+.calendar {
+    position: relative;
+    background: #faf6ee;
+    padding: 14px 12px 10px;
+    border: 3px solid #d5cfc0;
+    box-shadow: 
+        4px 4px 0 rgba(0,0,0,0.2),
+        0 12px 30px rgba(0,0,0,0.4);
+    text-align: center;
+    transform: rotate(-1.5deg);
+    transition: transform 0.15s steps(2);
+}
+
+.calendar:hover {
+    transform: rotate(0deg) scale(1.04);
+}
+
+.calendar-top {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 16px;
+    background: #aaa;
+    border: 2px solid #888;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 2px;
+}
+
+.calendar-top span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: #999;
+}
+
+.calendar-hole {
+    position: absolute;
+    top: -26px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px;
+    height: 7px;
+    background: #2a2a3d;
+    border: 2px solid #666;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.calendar::before,
+.calendar::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    border: 2px solid #d0c8b8;
+    border-top: none;
+    background: #f0ead8;
+}
+
+.calendar::before {
+    bottom: -4px;
+    height: 7px;
+}
+
+.calendar::after {
+    bottom: -9px;
+    height: 5px;
+    background: #e8e0d0;
+}
+
+.cal-month {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #999;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.cal-day {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 32px;
+    color: #2a2a3d;
+    line-height: 1;
+    margin: 4px 0;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.06);
+}
+
+.cal-weekday {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #777;
+    letter-spacing: 2px;
+}
+
+/* Дебаг */
+.debug {
+    position: absolute;
+    right: -270px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(15,15,30,0.92);
+    padding: 14px 18px;
+    border: 2px solid #4a4a6e;
+    font-size: 7px;
+    color: #aaffaa;
+    font-family: 'Press Start 2P', monospace;
+    line-height: 2;
+    min-width: 230px;
+    z-index: 30;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    pointer-events: none;
+}
+
+.debug-title {
+    color: #ffaa66;
+    font-size: 8px;
+    letter-spacing: 2px;
+    border-bottom: 2px solid #3a3a5a;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+}
+
+.debug-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.debug-label { color: rgba(255,255,255,0.4); }
+.debug-value { color: #fff; }
+.debug-value.ok { color: #66ff88; }
+.debug-value.warn { color: #ffcc44; }
+
+/* Адаптив */
+@media (max-width: 1100px) {
+    .debug {
+        position: static;
+        transform: none;
+        margin-top: 20px;
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    body { padding: 12px; }
+    .room { padding: 16px; }
+    .wall { padding: 16px; }
+    .window { border-width: 5px; }
+    .sill {
+        height: 32px;
+        padding: 0 12px;
+        bottom: -18px;
+        left: -18px;
+        right: -18px;
+    }
+    .clock-time { font-size: 13px; letter-spacing: 1px; }
+    .calendar-wall {
+        position: static;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+    .nail, .string, .calendar-top, .calendar-hole { display: none; }
+    .calendar { transform: none !important; }
+    .cal-day { font-size: 24px; }
+}
+
+@media (max-width: 400px) {
+    .room { padding: 10px; }
+    .wall { padding: 10px; }
+    .sill { height: 26px; padding: 0 8px; bottom: -14px; left: -12px; right: -12px; }
+    .clock { padding: 4px 8px; border-width: 2px; }
+    .clock-time { font-size: 10px; }
+    .calendar { padding: 8px; }
+    .cal-day { font-size: 18px; }
+    .cal-month, .cal-weekday { font-size: 6px; }
+}
