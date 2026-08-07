@@ -7,34 +7,15 @@ function pixelRect(x, y, w, h, color) {
     DOM.ctx.fillRect(R(x), R(y), R(w), R(h));
 }
 
-// Обновленная функция для кодов погоды OpenWeatherMap
 function getWeatherCategory(code) {
-    // OpenWeatherMap weather codes: https://openweathermap.org/weather-conditions
-    
-    // Thunderstorm (200-232)
     if (code >= 200 && code < 300) return 'storm';
-    
-    // Drizzle (300-321)
     if (code >= 300 && code < 400) return 'rain';
-    
-    // Rain (500-531)
     if (code >= 500 && code < 600) return 'rain';
-    
-    // Snow (600-622)
     if (code >= 600 && code < 700) return 'snow';
-    
-    // Atmosphere (701-781)
     if (code >= 701 && code < 800) return 'cloudy';
-    
-    // Clear (800)
     if (code === 800) return 'clear';
-    
-    // Few clouds (801)
     if (code === 801) return 'partly';
-    
-    // Clouds (802-804)
     if (code >= 802 && code <= 804) return 'cloudy';
-    
     return 'cloudy';
 }
 
@@ -69,12 +50,20 @@ function updateDisplay() {
 }
 
 function updateDebug() {
-    DOM.dbCity.textContent = `${State.city}, ${State.country}`;
+    // IP информация
+    DOM.dbIpCity.textContent = State.ipCity || '—';
+    DOM.dbIpRegion.textContent = State.ipRegion || '—';
+    DOM.dbIpCountry.textContent = State.ipCountry || '—';
+    DOM.dbIpCoords.textContent = State.ipLat ? `${State.ipLat.toFixed(2)}, ${State.ipLon.toFixed(2)}` : '—';
+    
+    // Погода
+    DOM.dbCity.textContent = `${State.apiCity}, ${State.country}`;
     DOM.dbCond.textContent = State.condition || '—';
     DOM.dbTemp.textContent = State.temp !== '' ? `${State.temp}°C` : '—';
     DOM.dbWind.textContent = State.wind !== '' ? `${State.wind} м/с` : '—';
     DOM.dbHum.textContent = State.humidity !== '' ? `${State.humidity}%` : '—';
 
+    // Небо
     const wc = getWeatherCategory(State.conditionCode);
     const skyMap = {
         clear: '☀️ Ясно',

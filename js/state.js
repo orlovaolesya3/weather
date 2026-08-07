@@ -3,14 +3,23 @@ const State = {
     W: 0, H: 0,
     frame: 0,
     
-    city: '',
+    // IP информация
+    ipCity: '',
+    ipRegion: '',
+    ipCountry: '',
+    ipLat: 0,
+    ipLon: 0,
+    
+    // Погода
+    apiCity: '',
     country: '',
-    temp: '',
     condition: '',
     conditionCode: 0,
+    temp: '',
     wind: 0,
     humidity: '',
     
+    // Время
     hour: 12,
     minute: 0,
     second: 0,

@@ -10,11 +10,20 @@ const DOM = {
     calDay: $('calDay'),
     calWeekday: $('calWeekday'),
     
+    // IP информация
+    dbIpCity: $('dbIpCity'),
+    dbIpRegion: $('dbIpRegion'),
+    dbIpCountry: $('dbIpCountry'),
+    dbIpCoords: $('dbIpCoords'),
+    
+    // Погода
     dbCity: $('dbCity'),
     dbCond: $('dbCond'),
     dbTemp: $('dbTemp'),
     dbWind: $('dbWind'),
     dbHum: $('dbHum'),
+    
+    // Система
     dbTime: $('dbTime'),
     dbSky: $('dbSky')
 };
