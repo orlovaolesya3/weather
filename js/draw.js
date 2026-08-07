@@ -289,12 +289,13 @@ function drawScene() {
         DOM.ctx.fillRect(wx, wy, ww, wh);
     }
 
-    // ===== СЛОЙ 9: СВЕЧЕНИЕ =====
+        // ===== СЛОЙ 9: СВЕЧЕНИЕ =====
     if ((showSun || showMoon) && sunX > 0) {
-        const glowR = (showMoon ? 100 : 64) * sunSc;
+        const glowR = (showMoon ? 80 : 64) * sunSc;
+        const glowAlpha = showMoon ? 0.02 : 0.04;
         for (let r = glowR; r > 0; r -= CONFIG.PX * 2) {
-            const a = .04 * (1 - r / glowR);
-            const color = showMoon ? '180,190,240' : '255,240,180';
+            const a = glowAlpha * (1 - r / glowR);
+            const color = showMoon ? '160,170,220' : '255,240,180';
             DOM.ctx.fillStyle = `rgba(${color},${a})`;
             DOM.ctx.beginPath(); DOM.ctx.arc(sunX, sunY, r, 0, Math.PI * 2); DOM.ctx.fill();
         }
