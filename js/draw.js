@@ -224,12 +224,38 @@ function drawScene() {
 
     DOM.ctx.restore();
 
-    if (switchSprite.state) {
-        for (const [gx, gy] of [[0, 0], [W, 0]]) {
-            const lg = DOM.ctx.createRadialGradient(gx, gy, 0, gx, gy, W * .8);
-            lg.addColorStop(0, 'rgba(255,230,170,0.25)'); lg.addColorStop(.2, 'rgba(255,210,140,0.15)');
-            lg.addColorStop(.5, 'rgba(255,180,100,0.05)'); lg.addColorStop(1, 'rgba(255,140,60,0)');
-            DOM.ctx.fillStyle = lg; DOM.ctx.fillRect(0, 0, W, H);
-        }
+    // Кот на подоконнике
+    const catScale = ww / 270;
+    const catW = 120 * catScale;
+    const catH = 48 * catScale;
+    const catX = wx + 10;
+    const catY = H * .97 - catH;
+    catSprite.draw(DOM.ctx, catX, catY, catW, catH);
+
+    // Затемнение всей комнаты кроме окна (меньше при включённом свете)
+    if (darkness > 0.1) {
+        const lightMultiplier = switchSprite.state ? 0.3 : 1;
+        DOM.ctx.save();
+        DOM.ctx.beginPath();
+        DOM.ctx.rect(0, 0, W, H);
+        DOM.ctx.rect(wx, wy, ww, wh);
+        DOM.ctx.clip('evenodd');
+        DOM.ctx.fillStyle = `rgba(5, 5, 25, ${(darkness - 0.1) * 0.5 * lightMultiplier})`;
+        DOM.ctx.fillRect(0, 0, W, H);
+        DOM.ctx.restore();
     }
+
+    // Свет от верхних углов
+    const overlay = document.getElementById('lightOverlay');
+    if (overlay) {
+        if (switchSprite.state) overlay.classList.add('on');
+        else overlay.classList.remove('on');
+    }
+
+    // CSS затемнение для часов, календаря, переключателя (меньше при свете)
+    const lightMultiplier = switchSprite.state ? 0.3 : 1;
+    const filterVal = darkness > 0.1 ? `brightness(${1 - (darkness - 0.1) * 0.6 * lightMultiplier})` : 'brightness(1)';
+    document.querySelector('.clock').style.filter = filterVal;
+    document.querySelector('.calendar-wall').style.filter = filterVal;
+    document.querySelector('.light-switch').style.filter = filterVal;
 }
