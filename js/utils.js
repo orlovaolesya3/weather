@@ -27,13 +27,13 @@ function resizeCanvas() {
 function drawClock(ts) {
     if (!DOM.clockCtx) return;
     const ctx = DOM.clockCtx;
-    ctx.clearRect(0, 0, 240, 96);
+    ctx.clearRect(0, 0, 250, 100);
     const s = SpriteLoader.get('clock');
-    if (s) s.draw(ctx, 0, 0, 3);
+    if (s) s.draw(ctx, 0, 0, 3.1);
     ctx.fillStyle = '#88ccaa';
-    ctx.font = '20px "Press Start 2P", monospace';
+    ctx.font = '19px "Press Start 2P", monospace';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(ts, 120, 48);
+    ctx.fillText(ts, 125, 50);
 }
 
 function drawCalendar() {

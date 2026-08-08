@@ -18,7 +18,7 @@ function initCanvas() {
 
 function initClockCanvas() {
     const c = document.createElement('canvas');
-    c.id = 'clockCanvas'; c.width = 240; c.height = 96;
+    c.id = 'clockCanvas'; c.width = 250; c.height = 100;
     c.style.cssText = 'image-rendering:pixelated;display:block';
     document.querySelector('.clock').innerHTML = '';
     document.querySelector('.clock').appendChild(c);

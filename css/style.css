@@ -23,12 +23,11 @@ body {
     image-rendering: pixelated;
 }
 
-/* Часы */
 .clock {
     position: fixed;
     z-index: 10;
-    right: 6%;
-    bottom: 8%;
+    right: 5%;
+    bottom: 5%;
     image-rendering: pixelated;
     display: none;
     transition: filter 2s;
@@ -42,7 +41,6 @@ body {
     display: block;
     image-rendering: pixelated;
 }
-
 /* Календарь */
 .calendar-wall {
     position: fixed;
