@@ -81,6 +81,47 @@ body {
     image-rendering: pixelated;
 }
 
+/* Панель звука */
+.sound-panel {
+    position: fixed;
+    z-index: 25;
+    right: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sound-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    font-family: 'Press Start 2P', monospace;
+    image-rendering: pixelated;
+    min-width: 40px;
+    text-align: center;
+    line-height: 1;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+}
+
+.sound-btn:hover {
+    color: #fff;
+}
+
+.sound-slider {
+    width: 80px;
+    cursor: pointer;
+    accent-color: #ffaa66;
+    height: 20px;
+}
+
 /* Дебаг */
 .debug {
     position: fixed;
@@ -140,6 +181,8 @@ body {
     #calendarCanvas { width: 80px !important; height: 120px !important; }
     .light-switch { right: 5%; top: 40%; }
     #switchCanvas { width: 64px !important; height: 64px !important; }
+    .sound-panel { right: 4px; top: 4px; gap: 4px; }
+    .sound-slider { width: 60px; }
     .debug { left: 2px; bottom: 2px; font-size: 6px; min-width: 180px; padding: 8px 10px; }
 }
 

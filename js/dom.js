@@ -1,29 +1,13 @@
 const $ = id => document.getElementById(id);
 
 const DOM = {
-    canvas: $('mainCanvas'),
-    ctx: null,
-    
-    clockCanvas: null,
-    clockCtx: null,
-    
-    calendarCanvas: null,
-    calendarCtx: null,
-    
-    switchCanvas: null,
-    switchCtx: null,
-    
-    dbIpCity: $('dbIpCity'),
-    dbIpRegion: $('dbIpRegion'),
-    dbIpCountry: $('dbIpCountry'),
-    dbIpCoords: $('dbIpCoords'),
-    dbCity: $('dbCity'),
-    dbCond: $('dbCond'),
-    dbTemp: $('dbTemp'),
-    dbWind: $('dbWind'),
-    dbHum: $('dbHum'),
-    dbTime: $('dbTime'),
-    dbSky: $('dbSky'),
+    canvas: $('mainCanvas'), ctx: null,
+    clockCanvas: null, clockCtx: null,
+    calendarCanvas: null, calendarCtx: null,
+    switchCanvas: null, switchCtx: null,
+    dbIpCity: $('dbIpCity'), dbIpRegion: $('dbIpRegion'), dbIpCountry: $('dbIpCountry'),
+    dbIpCoords: $('dbIpCoords'), dbCond: $('dbCond'), dbTemp: $('dbTemp'),
+    dbWind: $('dbWind'), dbHum: $('dbHum'), dbTime: $('dbTime'), dbSky: $('dbSky'),
     dbLight: $('dbLight')
 };
 
@@ -34,13 +18,10 @@ function initCanvas() {
 
 function initClockCanvas() {
     const c = document.createElement('canvas');
-    c.id = 'clockCanvas';
-    c.width = 240;
-    c.height = 96;
+    c.id = 'clockCanvas'; c.width = 240; c.height = 96;
     c.style.cssText = 'image-rendering:pixelated;display:block';
-    const clockEl = document.querySelector('.clock');
-    clockEl.innerHTML = '';
-    clockEl.appendChild(c);
+    document.querySelector('.clock').innerHTML = '';
+    document.querySelector('.clock').appendChild(c);
     DOM.clockCanvas = c;
     DOM.clockCtx = c.getContext('2d');
     DOM.clockCtx.imageSmoothingEnabled = false;
@@ -48,12 +29,9 @@ function initClockCanvas() {
 
 function initCalendarCanvas() {
     const c = document.createElement('canvas');
-    c.id = 'calendarCanvas';
-    c.width = 128;
-    c.height = 192;
+    c.id = 'calendarCanvas'; c.width = 128; c.height = 192;
     c.style.cssText = 'image-rendering:pixelated;display:block';
-    const calEl = document.querySelector('.calendar-wall');
-    calEl.appendChild(c);
+    document.querySelector('.calendar-wall').appendChild(c);
     DOM.calendarCanvas = c;
     DOM.calendarCtx = c.getContext('2d');
     DOM.calendarCtx.imageSmoothingEnabled = false;
@@ -61,17 +39,14 @@ function initCalendarCanvas() {
 
 function initSwitchCanvas() {
     const c = document.createElement('canvas');
-    c.id = 'switchCanvas';
-    c.width = 96;
-    c.height = 96;
+    c.id = 'switchCanvas'; c.width = 96; c.height = 96;
     c.style.cssText = 'image-rendering:pixelated;display:block';
-    const switchEl = document.querySelector('.light-switch');
-    switchEl.appendChild(c);
+    const el = document.querySelector('.light-switch');
+    el.appendChild(c);
     DOM.switchCanvas = c;
     DOM.switchCtx = c.getContext('2d');
     DOM.switchCtx.imageSmoothingEnabled = false;
-    
-    switchEl.addEventListener('click', () => {
+    el.addEventListener('click', () => {
         switchSprite.toggle();
         drawSwitch();
         updateDebug();

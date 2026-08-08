@@ -1,22 +1,11 @@
 const SpriteLoader = {
-    sprites: {
-        clock: clockSprite,
-    },
-    
+    sprites: { clock: clockSprite },
     async loadAll() {
-        const promises = Object.values(this.sprites).map(sprite => sprite.load());
-        promises.push(cloudSprites.loadAll());
-        promises.push(sunMoonSprites.loadAll());
-        promises.push(groundSprite.load());
-        promises.push(treesSprite.loadAll());
-        promises.push(roomSprite.load());
-        promises.push(calendarSprite.load());
-        promises.push(switchSprite.load());
-        await Promise.all(promises);
-        console.log('✅ All sprites loaded');
+        await Promise.all([
+            ...Object.values(this.sprites).map(s => s.load()),
+            cloudSprites.loadAll(), sunMoonSprites.loadAll(), groundSprite.load(),
+            treesSprite.loadAll(), roomSprite.load(), calendarSprite.load(), switchSprite.load()
+        ]);
     },
-    
-    get(name) {
-        return this.sprites[name] || null;
-    }
+    get(name) { return this.sprites[name] || null; }
 };

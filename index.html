@@ -11,25 +11,23 @@
 
 <canvas id="mainCanvas"></canvas>
 
-<!-- Календарь на стене -->
 <div class="calendar-wall" id="calendarWall"></div>
 
-<!-- Часы на подоконнике -->
-<div class="clock" id="clock">
-    <span class="clock-time" id="clockTime">00:00:00</span>
-</div>
+<div class="clock" id="clock"><span class="clock-time" id="clockTime">00:00:00</span></div>
 
-<!-- Выключатель -->
 <div class="light-switch" id="lightSwitch"></div>
 
-<!-- Дебаг -->
+<div class="sound-panel" id="soundPanel">
+    <button class="sound-btn" id="soundToggle">▷</button>
+    <input type="range" class="sound-slider" id="soundVolume" min="0" max="100" value="50">
+</div>
+
 <div class="debug" id="debug">
     <div class="debug-title">ДЕБАГ</div>
     <div class="debug-row"><span class="debug-label">IP Город:</span><span class="debug-value" id="dbIpCity">—</span></div>
     <div class="debug-row"><span class="debug-label">IP Регион:</span><span class="debug-value" id="dbIpRegion">—</span></div>
     <div class="debug-row"><span class="debug-label">IP Страна:</span><span class="debug-value" id="dbIpCountry">—</span></div>
     <div class="debug-row"><span class="debug-label">Координаты:</span><span class="debug-value" id="dbIpCoords">—</span></div>
-    <div class="debug-row"><span class="debug-label">Город API:</span><span class="debug-value" id="dbCity">—</span></div>
     <div class="debug-row"><span class="debug-label">Погода:</span><span class="debug-value" id="dbCond">—</span></div>
     <div class="debug-row"><span class="debug-label">Темп.:</span><span class="debug-value" id="dbTemp">—</span></div>
     <div class="debug-row"><span class="debug-label">Ветер:</span><span class="debug-value" id="dbWind">—</span></div>
@@ -37,12 +35,12 @@
     <div class="debug-row"><span class="debug-label">Время:</span><span class="debug-value ok" id="dbTime">—</span></div>
     <div class="debug-row"><span class="debug-label">Небо:</span><span class="debug-value" id="dbSky">—</span></div>
     <div class="debug-row"><span class="debug-label">Свет:</span><span class="debug-value ok" id="dbLight">ВЫКЛ</span></div>
-    <div class="debug-row" style="margin-top:8px; flex-direction:column; gap:4px;">
+    <div class="debug-row" style="margin-top:8px;flex-direction:column;gap:4px;">
         <span class="debug-label">Тест время:</span>
         <input type="range" id="timeSlider" min="0" max="1440" value="720" style="width:100%;">
         <span class="debug-value" id="testTime">12:00</span>
     </div>
-    <div class="debug-row" style="margin-top:8px; flex-direction:column; gap:4px;">
+    <div class="debug-row" style="margin-top:8px;flex-direction:column;gap:4px;">
         <span class="debug-label">Тест погода:</span>
         <div style="display:flex;flex-wrap:wrap;gap:4px;">
             <button class="weather-btn" data-weather="real" style="font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 6px;background:#2a2a3e;color:#fff;border:2px solid #ffaa66;cursor:pointer;">РЕАЛ</button>
@@ -62,6 +60,7 @@
 <script src="js/utils.js"></script>
 <script src="js/api.js"></script>
 <script src="js/generators.js"></script>
+<script src="js/sounds.js"></script>
 <script src="js/sprites/clock.js"></script>
 <script src="js/sprites/cloud.js"></script>
 <script src="js/sprites/sun.js"></script>

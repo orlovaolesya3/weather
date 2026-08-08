@@ -3,39 +3,18 @@ async function getCityByIP() {
         const r = await fetch('https://ipinfo.io/json');
         if (!r.ok) throw new Error();
         const d = await r.json();
-        const [lat, lon] = (d.loc||'55.7558,37.6173').split(',').map(Number);
-        return { city:d.city||'Moscow', region:d.region||'', country:d.country||'Russia', lat, lon, timezone:d.timezone||'Europe/Moscow' };
+        const [lat, lon] = (d.loc || '55.7558,37.6173').split(',').map(Number);
+        return { city: d.city || 'Moscow', region: d.region || '', country: d.country || 'Russia', lat, lon, timezone: d.timezone || 'Europe/Moscow' };
     } catch {
-        return { city:'Moscow', region:'Moscow', country:'Russia', lat:55.7558, lon:37.6173, timezone:'Europe/Moscow' };
+        return { city: 'Moscow', region: 'Moscow', country: 'Russia', lat: 55.7558, lon: 37.6173, timezone: 'Europe/Moscow' };
     }
 }
 
-async function getWeatherData(city) {
-    if (!CONFIG.API_KEY) throw new Error('No key');
-    const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${CONFIG.API_KEY}&units=metric&lang=ru`);
-    if (!r.ok) throw new Error('API error');
-    const d = await r.json();
-    return {
-        condition: { text:d.weather[0].description, code:d.weather[0].id, icon:d.weather[0].icon },
-        temp_c: d.main.temp, feels_like: d.main.feels_like,
-        wind_kph: d.wind.speed*3.6, wind_speed: d.wind.speed,
-        humidity: d.main.humidity, pressure: d.main.pressure,
-        clouds: d.clouds.all, visibility: d.visibility,
-        city_name: d.name, country: d.sys.country
-    };
-}
-
 async function getWeatherByCoords(lat, lon) {
-    if (!CONFIG.API_KEY) throw new Error('No key');
-    const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${CONFIG.API_KEY}&units=metric&lang=ru`);
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`);
     if (!r.ok) throw new Error('API error');
     const d = await r.json();
-    return {
-        condition: { text:d.weather[0].description, code:d.weather[0].id, icon:d.weather[0].icon },
-        temp_c: d.main.temp, feels_like: d.main.feels_like,
-        wind_kph: d.wind.speed*3.6, wind_speed: d.wind.speed,
-        humidity: d.main.humidity, pressure: d.main.pressure,
-        clouds: d.clouds.all, visibility: d.visibility,
-        city_name: d.name, country: d.sys.country
-    };
+    const c = d.current;
+    const codes = { 0:'Ясно', 1:'Преимущественно ясно', 2:'Переменная облачность', 3:'Пасмурно', 45:'Туман', 48:'Изморозь', 51:'Лёгкая морось', 53:'Морось', 55:'Сильная морось', 61:'Небольшой дождь', 63:'Дождь', 65:'Сильный дождь', 71:'Небольшой снег', 73:'Снег', 75:'Сильный снег', 77:'Снежные зёрна', 80:'Ливень', 81:'Сильный ливень', 82:'Очень сильный ливень', 85:'Снегопад', 86:'Сильный снегопад', 95:'Гроза', 96:'Гроза с градом', 99:'Сильная гроза с градом' };
+    return { condition: { text: codes[c.weather_code] || 'Неизвестно', code: c.weather_code }, temp_c: c.temperature_2m, wind_speed: c.wind_speed_10m, humidity: c.relative_humidity_2m };
 }
