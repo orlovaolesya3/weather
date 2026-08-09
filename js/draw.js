@@ -168,6 +168,14 @@ function drawScene() {
 
     groundSprite.draw(DOM.ctx, wx, gy, ww, groundDrawH);
     treesSprite.draw(DOM.ctx, wind, wx, gy, ww, groundDrawH);
+        // Машины на дороге
+    const carScale = ww / 400;
+    if (State.frame === 1) carsSprite.init(ww, gy + groundDrawH * .7);
+    carsSprite.draw(DOM.ctx, wx, wy, ww, wh, gy + groundDrawH * .7, carScale);
+    if (State.frame === 1) ducksSprite.init(ww, gy);
+    if (State.frame === 1) ducksSprite.init(ww, gy);
+    if (State.frame % 3 === 0) ducksSprite.update(ww);
+    ducksSprite.draw(DOM.ctx, wx, wy, ww, wh, gy, carScale);
 
     if (rainy) {
         const cnt = wc === 'storm' ? 180 : 100;
