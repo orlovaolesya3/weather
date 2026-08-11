@@ -17,21 +17,21 @@ const ducksSprite = {
     
     init(ww, gy) {
         this.ducks = [];
-        const minDistance = 5;
-        const maxAttempts = 50;
+        const minDist = 8;
+        const maxAttempts = 100;
         
         for (let i = 0; i < 3; i++) {
-            let y, attempts = 0;
+            let x, y, attempts = 0;
             do {
+                x = ww * 0.24 + Math.random() * ww * 0.12;
                 y = gy + 265 + Math.random() * 30;
                 attempts++;
                 if (attempts > maxAttempts) break;
-            } while (this.ducks.some(d => Math.abs(d.y - y) < minDistance));
+            } while (this.ducks.some(d => Math.abs(d.x - x) < minDist || Math.abs(d.y - y) < minDist));
             
             this.ducks.push({
                 size: 0.7 + Math.random() * 0.6,
-                x: ww * 0.24 + Math.random() * ww * 0.12,
-                y: y,
+                x, y,
                 speed: 0.02 + Math.random() * 0.05,
                 direction: Math.random() > 0.5 ? 1 : -1
             });

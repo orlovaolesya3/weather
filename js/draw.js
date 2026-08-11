@@ -75,6 +75,7 @@ function drawScene() {
     const ni = night ? 0 : 1;
     const groundScale = ww / groundSprite.width, groundDrawH = groundSprite.height * groundScale;
     const gy = wy + wh - groundDrawH;
+    const carScale = ww / 400;
 
     DOM.ctx.save();
     DOM.ctx.beginPath(); DOM.ctx.rect(wx, wy, ww, wh); DOM.ctx.clip();
@@ -148,7 +149,12 @@ function drawScene() {
     }
 
     if (showCl && State.clouds.length) {
-        for (const cl of State.clouds) {
+        const sortedClouds = [...State.clouds].sort((a, b) => {
+            const sizes = { small: 0, medium: 1, large: 2 };
+            return (sizes[b.type] || 1) - (sizes[a.type] || 1);
+        });
+        
+        for (const cl of sortedClouds) {
             const cx = R(wx + cl.x * ww + Math.sin(State.frame * .005 * cl.speed + cl.y * 10) * ww * .02);
             const cy = R(wy + cl.y * wh);
             if (!cloudSprites.draw(DOM.ctx, cl.type, cx, cy, 3)) drawCloud(cx, cy, 6, 3, '#ddeeff', '#ccddee');
@@ -168,14 +174,16 @@ function drawScene() {
 
     groundSprite.draw(DOM.ctx, wx, gy, ww, groundDrawH);
     treesSprite.draw(DOM.ctx, wind, wx, gy, ww, groundDrawH);
-        // Машины на дороге
-    const carScale = ww / 400;
-    if (State.frame === 1) carsSprite.init(ww, gy + groundDrawH * .7);
-    carsSprite.draw(DOM.ctx, wx, wy, ww, wh, gy + groundDrawH * .7, carScale);
-    if (State.frame === 1) ducksSprite.init(ww, gy);
+
+    // Утки (под машинами)
     if (State.frame === 1) ducksSprite.init(ww, gy);
     if (State.frame % 3 === 0) ducksSprite.update(ww);
     ducksSprite.draw(DOM.ctx, wx, wy, ww, wh, gy, carScale);
+
+    // Машины на дороге (поверх уток)
+    const carsGy = gy + groundDrawH * .7;
+    if (State.frame === 1) carsSprite.init(ww, carsGy);
+    carsSprite.draw(DOM.ctx, wx, wy, ww, wh, carsGy, carScale);
 
     if (rainy) {
         const cnt = wc === 'storm' ? 180 : 100;

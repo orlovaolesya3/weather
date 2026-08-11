@@ -48,7 +48,7 @@ async function initializeApp() {
         if (testHour !== null) {
             State.hour = testHour; State.minute = testMinute; State.second = 0;
             drawClock(`${String(testHour).padStart(2,'0')}:${String(testMinute).padStart(2,'0')}:00`);
-            DOM.dbTime.textContent = `${String(testHour).padStart(2,'0')}:${String(testMinute).padStart(2,'0')}:00 (тест)`;
+            DOM.dbTime.textContent = `${String(testHour).padStart(2,'0')}:${String(testMinute).padStart(2,'0')}:00 (test)`;
             DOM.dbTime.className = 'debug-value warn';
             return;
         }
@@ -69,7 +69,7 @@ async function initializeApp() {
         State.loaded = true;
     } catch {
         State.apiCity = State.ipCity || 'Moscow'; State.country = State.ipCountry || 'Russia';
-        State.condition = 'Переменная облачность'; State.conditionCode = 2;
+        State.condition = 'Partly cloudy'; State.conditionCode = 2;
         State.temp = 22; State.wind = 3; State.humidity = 55;
     }
 
@@ -101,6 +101,18 @@ async function initializeApp() {
     document.querySelector('.clock').classList.add('visible');
     document.querySelector('.calendar-wall').classList.add('visible');
     document.querySelector('.light-switch').classList.add('visible');
+
+    // Секретный код: D+E+B для дебаг-панели
+    const keys = {};
+    document.addEventListener('keydown', (e) => {
+        keys[e.key.toLowerCase()] = true;
+        if (keys['d'] && keys['e'] && keys['b']) {
+            DOM.debug.classList.toggle('visible');
+        }
+    });
+    document.addEventListener('keyup', (e) => {
+        keys[e.key.toLowerCase()] = false;
+    });
 
     (function loop() { drawScene(); requestAnimationFrame(loop); })();
 }

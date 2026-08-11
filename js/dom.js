@@ -5,6 +5,7 @@ const DOM = {
     clockCanvas: null, clockCtx: null,
     calendarCanvas: null, calendarCtx: null,
     switchCanvas: null, switchCtx: null,
+    debug: $('debug'),
     dbIpCity: $('dbIpCity'), dbIpRegion: $('dbIpRegion'), dbIpCountry: $('dbIpCountry'),
     dbIpCoords: $('dbIpCoords'), dbCond: $('dbCond'), dbTemp: $('dbTemp'),
     dbWind: $('dbWind'), dbHum: $('dbHum'), dbTime: $('dbTime'), dbSky: $('dbSky'),

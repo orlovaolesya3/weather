@@ -57,8 +57,7 @@ function updateDisplay() {
     State.hour = +tp[0] || 0; State.minute = +tp[1] || 0; State.second = +tp[2] || 0;
     const dp = ds.split(', '); const dn = dp[1]?.split('/') || ['1','1'];
     State.month = +dn[0] || 1; State.day = +dn[1] || 1;
-    const wm = { Mon:'ПН', Tue:'ВТ', Wed:'СР', Thu:'ЧТ', Fri:'ПТ', Sat:'СБ', Sun:'ВС' };
-    State.weekday = wm[dp[0]] || 'ПН';
+    State.weekday = dp[0] || 'MON';
     const t = `${String(State.hour).padStart(2,'0')}:${String(State.minute).padStart(2,'0')}:${String(State.second).padStart(2,'0')}`;
     drawClock(t); drawCalendar();
     DOM.dbTime.textContent = t;

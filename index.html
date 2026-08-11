@@ -23,27 +23,27 @@
 </div>
 <div class="light-overlay" id="lightOverlay"></div>
 <div class="debug" id="debug">
-    <div class="debug-title">ДЕБАГ</div>
-    <div class="debug-row"><span class="debug-label">IP Город:</span><span class="debug-value" id="dbIpCity">—</span></div>
-    <div class="debug-row"><span class="debug-label">IP Регион:</span><span class="debug-value" id="dbIpRegion">—</span></div>
-    <div class="debug-row"><span class="debug-label">IP Страна:</span><span class="debug-value" id="dbIpCountry">—</span></div>
-    <div class="debug-row"><span class="debug-label">Координаты:</span><span class="debug-value" id="dbIpCoords">—</span></div>
-    <div class="debug-row"><span class="debug-label">Погода:</span><span class="debug-value" id="dbCond">—</span></div>
-    <div class="debug-row"><span class="debug-label">Темп.:</span><span class="debug-value" id="dbTemp">—</span></div>
-    <div class="debug-row"><span class="debug-label">Ветер:</span><span class="debug-value" id="dbWind">—</span></div>
-    <div class="debug-row"><span class="debug-label">Влаж.:</span><span class="debug-value" id="dbHum">—</span></div>
-    <div class="debug-row"><span class="debug-label">Время:</span><span class="debug-value ok" id="dbTime">—</span></div>
-    <div class="debug-row"><span class="debug-label">Небо:</span><span class="debug-value" id="dbSky">—</span></div>
-    <div class="debug-row"><span class="debug-label">Свет:</span><span class="debug-value ok" id="dbLight">ВЫКЛ</span></div>
+    <div class="debug-title">DEBUG</div>
+    <div class="debug-row"><span class="debug-label">IP City:</span><span class="debug-value" id="dbIpCity">—</span></div>
+    <div class="debug-row"><span class="debug-label">IP Region:</span><span class="debug-value" id="dbIpRegion">—</span></div>
+    <div class="debug-row"><span class="debug-label">IP Country:</span><span class="debug-value" id="dbIpCountry">—</span></div>
+    <div class="debug-row"><span class="debug-label">Coords:</span><span class="debug-value" id="dbIpCoords">—</span></div>
+    <div class="debug-row"><span class="debug-label">Weather:</span><span class="debug-value" id="dbCond">—</span></div>
+    <div class="debug-row"><span class="debug-label">Temp:</span><span class="debug-value" id="dbTemp">—</span></div>
+    <div class="debug-row"><span class="debug-label">Wind:</span><span class="debug-value" id="dbWind">—</span></div>
+    <div class="debug-row"><span class="debug-label">Humidity:</span><span class="debug-value" id="dbHum">—</span></div>
+    <div class="debug-row"><span class="debug-label">Time:</span><span class="debug-value ok" id="dbTime">—</span></div>
+    <div class="debug-row"><span class="debug-label">Sky:</span><span class="debug-value" id="dbSky">—</span></div>
+    <div class="debug-row"><span class="debug-label">Light:</span><span class="debug-value ok" id="dbLight">OFF</span></div>
     <div class="debug-row" style="margin-top:8px;flex-direction:column;gap:4px;">
-        <span class="debug-label">Тест время:</span>
+        <span class="debug-label">Test Time:</span>
         <input type="range" id="timeSlider" min="0" max="1440" value="720" style="width:100%;">
         <span class="debug-value" id="testTime">12:00</span>
     </div>
     <div class="debug-row" style="margin-top:8px;flex-direction:column;gap:4px;">
-        <span class="debug-label">Тест погода:</span>
+        <span class="debug-label">Test Weather:</span>
         <div style="display:flex;flex-wrap:wrap;gap:4px;">
-            <button class="weather-btn" data-weather="real" style="font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 6px;background:#2a2a3e;color:#fff;border:2px solid #ffaa66;cursor:pointer;">РЕАЛ</button>
+            <button class="weather-btn" data-weather="real" style="font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 6px;background:#2a2a3e;color:#fff;border:2px solid #ffaa66;cursor:pointer;">REAL</button>
             <button class="weather-btn" data-weather="clear" style="font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 6px;background:#2a2a3e;color:#fff;border:2px solid #4a4a6e;cursor:pointer;">☀️</button>
             <button class="weather-btn" data-weather="partly" style="font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 6px;background:#2a2a3e;color:#fff;border:2px solid #4a4a6e;cursor:pointer;">⛅</button>
             <button class="weather-btn" data-weather="cloudy" style="font-family:'Press Start 2P',monospace;font-size:6px;padding:4px 6px;background:#2a2a3e;color:#fff;border:2px solid #4a4a6e;cursor:pointer;">☁️</button>

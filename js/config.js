@@ -1,7 +1,7 @@
 const CONFIG = {
     PX: 4,
-    MONTHS: ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'],
-    WEEKDAYS: ['ВС','ПН','ВТ','СР','ЧТ','ПТ','СБ'],
+    MONTHS: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
+    WEEKDAYS: ['SUN','MON','TUE','WED','THU','FRI','SAT'],
     
     WINDOW: { x1: 415, y1: 120, x2: 1400, y2: 696 },
     
