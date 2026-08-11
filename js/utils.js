@@ -1,4 +1,4 @@
-const R = v => Math.round(v);
+const R = Math.round;
 const RG = (v, g = CONFIG.PX) => Math.round(v / g) * g;
 
 function pixelRect(x, y, w, h, c) {
@@ -70,12 +70,12 @@ function updateDebug() {
     DOM.dbIpCoords.textContent = State.ipLat ? `${State.ipLat.toFixed(2)}, ${State.ipLon.toFixed(2)}` : '—';
     DOM.dbCond.textContent = State.condition || '—';
     DOM.dbTemp.textContent = State.temp !== '' ? `${State.temp}°C` : '—';
-    DOM.dbWind.textContent = State.wind !== '' ? `${State.wind} м/с` : '—';
+    DOM.dbWind.textContent = State.wind !== '' ? `${State.wind} m/s` : '—';
     DOM.dbHum.textContent = State.humidity !== '' ? `${State.humidity}%` : '—';
     const wc = getWeatherCategory(State.conditionCode);
-    const sm = { clear:'☀️ Ясно', partly:'⛅ Переменная', cloudy:'☁️ Облачно', rain:'🌧 Дождь', snow:'❄️ Снег', storm:'⛈ Гроза' };
+    const sm = { clear:'☀️ Clear', partly:'⛅ Partly', cloudy:'☁️ Cloudy', rain:'🌧 Rain', snow:'❄️ Snow', storm:'⛈ Storm' };
     DOM.dbSky.textContent = sm[wc] || wc;
     DOM.dbSky.className = `debug-value ${wc==='clear'?'ok':'warn'}`;
-    DOM.dbLight.textContent = switchSprite.state ? 'ВКЛ' : 'ВЫКЛ';
+    DOM.dbLight.textContent = switchSprite.state ? 'ON' : 'OFF';
     DOM.dbLight.className = switchSprite.state ? 'debug-value ok' : 'debug-value';
 }

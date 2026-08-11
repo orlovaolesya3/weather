@@ -20,7 +20,7 @@ function generateSnow(n = 80) {
     }));
 }
 
-function generateStars(n = 120) {
+function generateStars(n = 100) {
     State.stars = Array.from({ length: n }, () => ({
         x: Math.floor(Math.random() * 100), y: Math.floor(Math.random() * 60),
         brightness: 4 + Math.floor(Math.random() * 5), twinkleSpeed: .02 + Math.random() * .06

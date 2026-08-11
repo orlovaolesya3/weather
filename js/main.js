@@ -39,8 +39,8 @@ async function initializeApp() {
         const codes = { clear:0, partly:2, cloudy:3, rain:63, snow:73, storm:95 };
         State.conditionCode = testWeather ? codes[testWeather] || 3 : State.conditionCode;
         generateWeatherParticles(getWeatherCategory(State.conditionCode));
-        const isNight = testHour !== null ? (testHour < 6 || testHour >= 20) : (State.hour < 6 || State.hour >= 20);
-        SoundSystem.update(State.conditionCode, State.wind || 5, testHour !== null ? testHour : State.hour, isNight);
+        const h = testHour !== null ? testHour : State.hour;
+        SoundSystem.update(State.conditionCode, State.wind || 5, h, h < 6 || h >= 20);
     }
 
     const origUpdate = updateDisplay;
@@ -75,13 +75,12 @@ async function initializeApp() {
 
     generateWeatherParticles(getWeatherCategory(State.conditionCode));
     updateDisplay(); updateDebug();
-    const isNight = State.hour < 6 || State.hour >= 20;
-    SoundSystem.update(State.conditionCode, State.wind, State.hour, isNight);
+    SoundSystem.update(State.conditionCode, State.wind, State.hour, State.hour < 6 || State.hour >= 20);
 
     setInterval(() => {
         updateDisplay(); updateDebug();
-        const isNight = State.hour < 6 || State.hour >= 20;
-        SoundSystem.update(State.conditionCode, State.wind, State.hour, isNight);
+        const n = State.hour < 6 || State.hour >= 20;
+        SoundSystem.update(State.conditionCode, State.wind, State.hour, n);
     }, 1000);
 
     setInterval(async () => {
@@ -93,8 +92,6 @@ async function initializeApp() {
             State.temp = Math.round(w.temp_c); State.wind = Math.round(w.wind_speed); State.humidity = w.humidity;
             State.loaded = true;
             generateWeatherParticles(getWeatherCategory(State.conditionCode));
-            const isNight = State.hour < 6 || State.hour >= 20;
-            SoundSystem.update(State.conditionCode, State.wind, State.hour, isNight);
         } catch {}
     }, 30 * 60 * 1000);
 
@@ -102,17 +99,12 @@ async function initializeApp() {
     document.querySelector('.calendar-wall').classList.add('visible');
     document.querySelector('.light-switch').classList.add('visible');
 
-    // Секретный код: D+E+B для дебаг-панели
     const keys = {};
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
         keys[e.key.toLowerCase()] = true;
-        if (keys['d'] && keys['e'] && keys['b']) {
-            DOM.debug.classList.toggle('visible');
-        }
+        if (keys['d'] && keys['e'] && keys['b']) DOM.debug.classList.toggle('visible');
     });
-    document.addEventListener('keyup', (e) => {
-        keys[e.key.toLowerCase()] = false;
-    });
+    document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
     (function loop() { drawScene(); requestAnimationFrame(loop); })();
 }

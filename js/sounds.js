@@ -3,12 +3,18 @@ const SoundSystem = {
     
     async loadAll() {
         const list = { rain_light:'sounds/rain_light.mp3', storm:'sounds/storm.mp3', snow:'sounds/snow.mp3', wind_light:'sounds/wind_light.mp3', birds_day:'sounds/birds_day.mp3', crickets_night:'sounds/crickets_night.mp3' };
-        await Promise.all(Object.entries(list).map(([name, src]) => new Promise(resolve => {
-            const a = new Audio(src); a.loop = true; a.volume = 0; a.preload = 'auto';
-            a.addEventListener('canplaythrough', () => { this.sounds[name] = a; resolve(); }, { once: true });
-            a.addEventListener('error', () => resolve(), { once: true });
-            a.load();
-        })));
+        const entries = Object.entries(list);
+        for (let i = 0; i < entries.length; i++) {
+            const [name, src] = entries[i];
+            try {
+                const a = new Audio(src); a.loop = true; a.volume = 0; a.preload = 'auto';
+                await new Promise(resolve => {
+                    a.addEventListener('canplaythrough', () => { this.sounds[name] = a; resolve(); }, { once: true });
+                    a.addEventListener('error', () => resolve(), { once: true });
+                    a.load();
+                });
+            } catch(e) {}
+        }
     },
 
     setMasterVolume(vol) {
@@ -19,8 +25,7 @@ const SoundSystem = {
 
     toggleMute() {
         this.muted = !this.muted;
-        const btn = document.getElementById('soundToggle');
-        btn.textContent = this.muted ? '▷' : '⏸';
+        document.getElementById('soundToggle').textContent = this.muted ? '▷' : '⏸';
         if (this.currentSound && this.sounds[this.currentSound]) this.sounds[this.currentSound].volume = this.muted ? 0 : this.masterVolume;
     },
 
