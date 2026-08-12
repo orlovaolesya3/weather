@@ -1,225 +1,89 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background: #000;
-    font-family: 'Press Start 2P', monospace;
+    width: 100vw; height: 100vh; overflow: hidden;
+    background: #000; font-family: 'Press Start 2P', monospace;
 }
 
 #mainCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     image-rendering: pixelated;
 }
 
-/* Часы */
 .clock {
-    position: fixed;
-    z-index: 10;
-    right: 5%;
-    bottom: 5%;
-    image-rendering: pixelated;
-    display: none;
-    transition: filter 2s;
+    position: fixed; z-index: 10; image-rendering: pixelated;
+    display: none; transition: filter 2s;
 }
+.clock.visible { display: block; }
+#clockCanvas { display: block; image-rendering: pixelated; }
 
-.clock.visible {
-    display: block;
-}
-
-#clockCanvas {
-    display: block;
-    image-rendering: pixelated;
-}
-
-/* Календарь */
 .calendar-wall {
-    position: fixed;
-    z-index: 10;
-    image-rendering: pixelated;
-    left: 3%;
-    top: 28%;
-    display: none;
-    transition: filter 2s;
+    position: fixed; z-index: 10; image-rendering: pixelated;
+    display: none; transition: filter 2s;
 }
+.calendar-wall.visible { display: block; }
+#calendarCanvas { display: block; image-rendering: pixelated; }
 
-.calendar-wall.visible {
-    display: block;
-}
-
-#calendarCanvas {
-    display: block;
-    image-rendering: pixelated;
-}
-
-/* Выключатель */
 .light-switch {
-    position: fixed;
-    z-index: 10;
-    right: 8%;
-    top: 45%;
-    cursor: pointer;
-    image-rendering: pixelated;
-    display: none;
-    transition: filter 2s;
+    position: fixed; z-index: 10; cursor: pointer; image-rendering: pixelated;
+    display: none; transition: filter 2s;
 }
+.light-switch.visible { display: block; }
+#switchCanvas { display: block; image-rendering: pixelated; }
 
-.light-switch.visible {
-    display: block;
-}
-
-#switchCanvas {
-    display: block;
-    image-rendering: pixelated;
-}
-
-/* Панель звука */
 .sound-panel {
-    position: fixed;
-    z-index: 25;
-    right: 10px;
-    top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    position: fixed; z-index: 25; right: 10px; top: 10px;
+    display: flex; align-items: center; gap: 8px;
 }
 
 .sound-btn {
-    background: none;
-    border: none;
-    color: #ccc;
-    font-size: 28px;
-    cursor: pointer;
-    padding: 0;
-    font-family: 'Press Start 2P', monospace;
-    image-rendering: pixelated;
-    min-width: 40px;
-    text-align: center;
-    line-height: 1;
-    transition: color 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 40px;
+    background: none; border: none; color: #ccc; font-size: 28px;
+    cursor: pointer; padding: 0; font-family: 'Press Start 2P', monospace;
+    image-rendering: pixelated; min-width: 40px; text-align: center;
+    line-height: 1; transition: color 0.2s; display: flex;
+    align-items: center; justify-content: center; height: 40px;
 }
+.sound-btn:hover { color: #fff; }
 
-.sound-btn:hover {
-    color: #fff;
-}
+.sound-slider { width: 80px; cursor: pointer; accent-color: #ffaa66; height: 20px; }
 
-.sound-slider {
-    width: 80px;
-    cursor: pointer;
-    accent-color: #ffaa66;
-    height: 20px;
-}
-
-/* Свет */
 .light-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 20;
-    opacity: 0;
-    transition: opacity 0.5s;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 20; opacity: 0; transition: opacity 0.5s;
     background: radial-gradient(ellipse at top left, rgba(255,240,200,0.15) 0%, rgba(255,220,160,0.05) 30%, transparent 60%),
                 radial-gradient(ellipse at top right, rgba(255,240,200,0.15) 0%, rgba(255,220,160,0.05) 30%, transparent 60%),
                 rgba(255,220,170,0.04);
 }
+.light-overlay.on { opacity: 1; }
 
-.light-overlay.on {
-    opacity: 1;
-}
-
-/* Дебаг */
 .debug {
-    position: fixed;
-    left: 10px;
-    bottom: 10px;
-    background: rgba(15,15,30,0.92);
-    padding: 14px 18px;
-    border: 2px solid #4a4a6e;
-    font-size: 7px;
-    color: #aaffaa;
-    font-family: 'Press Start 2P', monospace;
-    line-height: 2;
-    min-width: 230px;
-    z-index: 30;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    pointer-events: auto;
-    max-height: 90vh;
-    overflow-y: auto;
-    display: none;
+    position: fixed; left: 10px; bottom: 10px;
+    background: rgba(15,15,30,0.92); padding: 14px 18px;
+    border: 2px solid #4a4a6e; font-size: 7px; color: #aaffaa;
+    font-family: 'Press Start 2P', monospace; line-height: 2;
+    min-width: 230px; z-index: 30; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    pointer-events: auto; max-height: 90vh; overflow-y: auto; display: none;
 }
+.debug.visible { display: block; }
 
-.debug.visible {
-    display: block;
-}
-
-.debug-title {
-    color: #ffaa66;
-    font-size: 8px;
-    letter-spacing: 2px;
-    border-bottom: 2px solid #3a3a5a;
-    padding-bottom: 6px;
-    margin-bottom: 8px;
-}
-
-.debug-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-}
-
+.debug-title { color: #ffaa66; font-size: 8px; letter-spacing: 2px; border-bottom: 2px solid #3a3a5a; padding-bottom: 6px; margin-bottom: 8px; }
+.debug-row { display: flex; justify-content: space-between; gap: 8px; }
 .debug-label { color: rgba(255,255,255,0.4); }
 .debug-value { color: #fff; }
 .debug-value.ok { color: #66ff88; }
 .debug-value.warn { color: #ffcc44; }
 
-#timeSlider {
-    cursor: pointer;
-    pointer-events: auto !important;
-    image-rendering: auto;
-    accent-color: #ffaa66;
-}
-
-#testTime {
-    pointer-events: auto !important;
-    text-align: center;
-}
+#timeSlider { cursor: pointer; pointer-events: auto !important; image-rendering: auto; accent-color: #ffaa66; }
+#testTime { pointer-events: auto !important; text-align: center; }
 
 @media (max-width: 768px) {
-    .clock { right: 3%; bottom: 6%; }
-    #clockCanvas { width: 140px !important; height: 56px !important; }
-    .calendar-wall { left: 2%; top: 24%; }
-    #calendarCanvas { width: 80px !important; height: 120px !important; }
-    .light-switch { right: 5%; top: 40%; }
-    #switchCanvas { width: 64px !important; height: 64px !important; }
     .sound-panel { right: 4px; top: 4px; gap: 4px; }
     .sound-slider { width: 60px; }
     .debug { left: 2px; bottom: 2px; font-size: 6px; min-width: 180px; padding: 8px 10px; }
 }
 
 @media (max-width: 1100px) {
-    .debug {
-        left: 2px;
-        bottom: 2px;
-        font-size: 6px;
-        min-width: 180px;
-        padding: 8px 10px;
-    }
+    .debug { left: 2px; bottom: 2px; font-size: 6px; min-width: 180px; padding: 8px 10px; }
 }

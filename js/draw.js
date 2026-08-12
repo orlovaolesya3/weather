@@ -40,13 +40,16 @@ function drawScene() {
     const { W, H, hour, wind } = State;
     const hf = hour + State.minute / 60;
 
-    roomSprite.draw(DOM.ctx, W, H);
-
-    if (State.frame === 1) {
-        cachedRoomScale = Math.max(W / roomSprite.width, H / roomSprite.height);
+    const newScale = Math.max(W / roomSprite.width, H / roomSprite.height);
+    if (State.frame === 1 || cachedRoomScale !== newScale) {
+        cachedRoomScale = newScale;
+        cachedGroundDrawH = null;
     }
     const rs = cachedRoomScale;
     const roomX = (W - roomSprite.width * rs) / 2, roomY = (H - roomSprite.height * rs) / 2;
+
+    roomSprite.draw(DOM.ctx, W, H);
+
     wx = roomX + CONFIG.WINDOW.x1 * rs; wy = roomY + CONFIG.WINDOW.y1 * rs;
     ww = (CONFIG.WINDOW.x2 - CONFIG.WINDOW.x1) * rs; wh = (CONFIG.WINDOW.y2 - CONFIG.WINDOW.y1) * rs;
 
@@ -77,7 +80,7 @@ function drawScene() {
     sc = CONFIG.SKY_COLORS[sk];
     const ni = night ? 0 : 1;
     
-    if (State.frame === 1 || !cachedGroundDrawH) {
+    if (!cachedGroundDrawH) {
         const groundScale = ww / groundSprite.width;
         cachedGroundDrawH = groundSprite.height * groundScale;
         cachedGy = wy + wh - cachedGroundDrawH;
@@ -246,16 +249,29 @@ function drawScene() {
 
     DOM.ctx.restore();
 
+    const winX = wx, winY = wy, winW = ww, winH = wh, winBottom = wy + wh;
+
     const catW = 120 * catScale, catH = 48 * catScale;
-    const catX = wx + 10, catY = H * .97 - catH;
-    catSprite.draw(DOM.ctx, catX, catY, catW, catH);
+    catSprite.draw(DOM.ctx, winX + 10, winBottom - catH + 180 * rs, catW, catH);
+
+    const clockEl = document.querySelector('.clock');
+    clockEl.style.right = (W - winX - winW - 210) + 'px';
+    clockEl.style.bottom = (H - winBottom + -130) + 'px';
+
+    const calEl = document.querySelector('.calendar-wall');
+    calEl.style.left = (winX - 357 * rs) + 'px';
+    calEl.style.top = (winY + winH * .23) + 'px';
+
+    const switchEl = document.querySelector('.light-switch');
+    switchEl.style.right = (W - winX - winW - 220 * rs) + 'px';
+    switchEl.style.top = (winY + winH * .48) + 'px';
 
     if (darkness > 0.1) {
         const lm = switchSprite.state ? 0.3 : 1;
         DOM.ctx.save();
         DOM.ctx.beginPath();
         DOM.ctx.rect(0, 0, W, H);
-        DOM.ctx.rect(wx, wy, ww, wh);
+        DOM.ctx.rect(winX, winY, winW, winH);
         DOM.ctx.clip('evenodd');
         DOM.ctx.fillStyle = `rgba(5, 5, 25, ${(darkness - 0.1) * 0.5 * lm})`;
         DOM.ctx.fillRect(0, 0, W, H);
@@ -267,7 +283,7 @@ function drawScene() {
 
     const lm = switchSprite.state ? 0.3 : 1;
     const filterVal = darkness > 0.1 ? `brightness(${1 - (darkness - 0.1) * 0.6 * lm})` : 'brightness(1)';
-    document.querySelector('.clock').style.filter = filterVal;
-    document.querySelector('.calendar-wall').style.filter = filterVal;
-    document.querySelector('.light-switch').style.filter = filterVal;
+    clockEl.style.filter = filterVal;
+    calEl.style.filter = filterVal;
+    switchEl.style.filter = filterVal;
 }

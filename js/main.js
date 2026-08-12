@@ -1,9 +1,12 @@
 async function initializeApp() {
     initCanvas();
-    await SpriteLoader.loadAll();
-    await SoundSystem.loadAll();
+    resizeCanvas();
+    
+    // Загружаем всё параллельно
+    await Promise.all([SpriteLoader.loadAll(), SoundSystem.loadAll()]);
+    
     initClockCanvas(); initCalendarCanvas(); initSwitchCanvas();
-    drawSwitch(); resizeCanvas(); generateStars();
+    drawSwitch(); generateStars();
 
     const soundToggle = document.getElementById('soundToggle');
     const soundVolume = document.getElementById('soundVolume');
@@ -55,11 +58,12 @@ async function initializeApp() {
         origUpdate();
     };
 
-    try {
-        const loc = await getCityByIP();
+    // Погода и IP параллельно
+    const [loc] = await Promise.all([getCityByIP().catch(() => null)]);
+    if (loc) {
         State.ipCity = loc.city; State.ipRegion = loc.region; State.ipCountry = loc.country;
         State.ipLat = loc.lat; State.ipLon = loc.lon; State.ipTimezone = loc.timezone;
-    } catch { State.ipTimezone = 'Europe/Moscow'; }
+    }
 
     try {
         const w = await getWeatherByCoords(State.ipLat, State.ipLon);
@@ -106,6 +110,7 @@ async function initializeApp() {
     });
     document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
+    // Запускаем анимацию
     (function loop() { drawScene(); requestAnimationFrame(loop); })();
 }
 

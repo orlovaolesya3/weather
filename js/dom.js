@@ -19,7 +19,7 @@ function initCanvas() {
 
 function initClockCanvas() {
     const c = document.createElement('canvas');
-    c.id = 'clockCanvas'; c.width = 250; c.height = 100;
+    c.width = 250; c.height = 100;
     c.style.cssText = 'image-rendering:pixelated;display:block';
     document.querySelector('.clock').innerHTML = '';
     document.querySelector('.clock').appendChild(c);
@@ -30,7 +30,7 @@ function initClockCanvas() {
 
 function initCalendarCanvas() {
     const c = document.createElement('canvas');
-    c.id = 'calendarCanvas'; c.width = 128; c.height = 192;
+    c.width = 128; c.height = 192;
     c.style.cssText = 'image-rendering:pixelated;display:block';
     document.querySelector('.calendar-wall').appendChild(c);
     DOM.calendarCanvas = c;
@@ -40,7 +40,7 @@ function initCalendarCanvas() {
 
 function initSwitchCanvas() {
     const c = document.createElement('canvas');
-    c.id = 'switchCanvas'; c.width = 96; c.height = 96;
+    c.width = 96; c.height = 96;
     c.style.cssText = 'image-rendering:pixelated;display:block';
     const el = document.querySelector('.light-switch');
     el.appendChild(c);

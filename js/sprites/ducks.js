@@ -24,7 +24,7 @@ const ducksSprite = {
             let x, y, attempts = 0;
             do {
                 x = ww * 0.24 + Math.random() * ww * 0.12;
-                y = gy + 265 + Math.random() * 30;
+                y = gy + 250 + Math.random() * 30;
                 attempts++;
                 if (attempts > maxAttempts) break;
             } while (this.ducks.some(d => Math.abs(d.x - x) < minDist || Math.abs(d.y - y) < minDist));

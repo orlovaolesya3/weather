@@ -1,5 +1,5 @@
 const roomSprite = {
-    image: null, loaded: false, width: 1776, height: 886,
+    image: null, loaded: false, width: 1920, height: 1080,
     load() {
         return new Promise(resolve => {
             this.image = new Image();

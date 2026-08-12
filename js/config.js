@@ -3,7 +3,7 @@ const CONFIG = {
     MONTHS: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
     WEEKDAYS: ['SUN','MON','TUE','WED','THU','FRI','SAT'],
     
-    WINDOW: { x1: 415, y1: 120, x2: 1400, y2: 696 },
+    WINDOW: { x1: 450, y1: 200, x2: 1514, y2: 821 },
     
     WEATHER_CONFIG: {
         clear: { c: 0, r: 0, s: 0 },
