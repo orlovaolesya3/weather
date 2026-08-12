@@ -24,31 +24,6 @@ function resizeCanvas() {
     DOM.ctx.setTransform(d, 0, 0, d, 0, 0);
 }
 
-function drawClock(ts) {
-    if (!DOM.clockCtx) return;
-    const ctx = DOM.clockCtx;
-    ctx.clearRect(0, 0, 250, 100);
-    const s = SpriteLoader.get('clock');
-    if (s) s.draw(ctx, 0, 0, 3.1);
-    ctx.fillStyle = '#88ccaa';
-    ctx.font = '19px "Press Start 2P", monospace';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(ts, 125, 50);
-}
-
-function drawCalendar() {
-    if (!DOM.calendarCtx) return;
-    const ctx = DOM.calendarCtx;
-    ctx.clearRect(0, 0, 128, 192);
-    calendarSprite.draw(ctx, 0, 0, 128, 192);
-    ctx.fillStyle = '#666'; ctx.font = '10px "Press Start 2P", monospace';
-    ctx.textAlign = 'center'; ctx.fillText(CONFIG.MONTHS[State.month-1], 64, 70);
-    ctx.fillStyle = '#2a2a3d'; ctx.font = '36px "Press Start 2P", monospace';
-    ctx.fillText(State.day, 64, 125);
-    ctx.fillStyle = '#555'; ctx.font = '10px "Press Start 2P", monospace';
-    ctx.fillText(State.weekday, 64, 143);
-}
-
 function updateDisplay() {
     const now = new Date();
     const ts = now.toLocaleString('en-US', { timeZone: State.ipTimezone, hour12: false });
@@ -58,9 +33,7 @@ function updateDisplay() {
     const dp = ds.split(', '); const dn = dp[1]?.split('/') || ['1','1'];
     State.month = +dn[0] || 1; State.day = +dn[1] || 1;
     State.weekday = dp[0] || 'MON';
-    const t = `${String(State.hour).padStart(2,'0')}:${String(State.minute).padStart(2,'0')}:${String(State.second).padStart(2,'0')}`;
-    drawClock(t); drawCalendar();
-    DOM.dbTime.textContent = t;
+    DOM.dbTime.textContent = `${String(State.hour).padStart(2,'0')}:${String(State.minute).padStart(2,'0')}:${String(State.second).padStart(2,'0')}`;
 }
 
 function updateDebug() {

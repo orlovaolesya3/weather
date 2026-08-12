@@ -14,5 +14,8 @@ const switchSprite = {
         const img = this.state ? this.imageOn : this.imageOff;
         if (img) ctx.drawImage(img, x, y, w, h);
         return true;
+    },
+    isClicked(mx, my, x, y, w, h) {
+        return mx >= x && mx <= x + w && my >= y && my <= y + h;
     }
 };

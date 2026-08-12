@@ -2,11 +2,8 @@ async function initializeApp() {
     initCanvas();
     resizeCanvas();
     
-    // Загружаем всё параллельно
     await Promise.all([SpriteLoader.loadAll(), SoundSystem.loadAll()]);
-    
-    initClockCanvas(); initCalendarCanvas(); initSwitchCanvas();
-    drawSwitch(); generateStars();
+    generateStars();
 
     const soundToggle = document.getElementById('soundToggle');
     const soundVolume = document.getElementById('soundVolume');
@@ -50,7 +47,6 @@ async function initializeApp() {
     updateDisplay = function() {
         if (testHour !== null) {
             State.hour = testHour; State.minute = testMinute; State.second = 0;
-            drawClock(`${String(testHour).padStart(2,'0')}:${String(testMinute).padStart(2,'0')}:00`);
             DOM.dbTime.textContent = `${String(testHour).padStart(2,'0')}:${String(testMinute).padStart(2,'0')}:00 (test)`;
             DOM.dbTime.className = 'debug-value warn';
             return;
@@ -58,12 +54,11 @@ async function initializeApp() {
         origUpdate();
     };
 
-    // Погода и IP параллельно
-    const [loc] = await Promise.all([getCityByIP().catch(() => null)]);
-    if (loc) {
+    try {
+        const loc = await getCityByIP();
         State.ipCity = loc.city; State.ipRegion = loc.region; State.ipCountry = loc.country;
         State.ipLat = loc.lat; State.ipLon = loc.lon; State.ipTimezone = loc.timezone;
-    }
+    } catch { State.ipTimezone = 'Europe/Moscow'; }
 
     try {
         const w = await getWeatherByCoords(State.ipLat, State.ipLon);
@@ -99,9 +94,25 @@ async function initializeApp() {
         } catch {}
     }, 30 * 60 * 1000);
 
-    document.querySelector('.clock').classList.add('visible');
-    document.querySelector('.calendar-wall').classList.add('visible');
-    document.querySelector('.light-switch').classList.add('visible');
+    DOM.canvas.addEventListener('click', (e) => {
+        const rect = DOM.canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        
+        const rs = Math.max(State.W / roomSprite.width, State.H / roomSprite.height);
+        const roomX = (State.W - roomSprite.width * rs) / 2;
+        const roomY = (State.H - roomSprite.height * rs) / 2;
+        const winX = roomX + CONFIG.WINDOW.x1 * rs;
+        const winW = (CONFIG.WINDOW.x2 - CONFIG.WINDOW.x1) * rs;
+        const winH = (CONFIG.WINDOW.y2 - CONFIG.WINDOW.y1) * rs;
+        const swX = winX + winW + 100 * rs;
+        const swY = roomY + CONFIG.WINDOW.y1 * rs + winH * .48;
+        
+        if (mx >= swX && mx <= swX + 96 && my >= swY && my <= swY + 96) {
+            switchSprite.toggle();
+            updateDebug();
+        }
+    });
 
     const keys = {};
     document.addEventListener('keydown', e => {
@@ -110,7 +121,6 @@ async function initializeApp() {
     });
     document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
-    // Запускаем анимацию
     (function loop() { drawScene(); requestAnimationFrame(loop); })();
 }
 

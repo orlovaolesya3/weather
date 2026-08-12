@@ -15,7 +15,6 @@ function drawCloud(cx, cy, w, h, c1, c2) {
 let sc, sunX, sunY, sunSc, showMoon, showSun, darkness, twilight, glowAlpha;
 let lightningFrames = 0, lightningAlpha = 0, lightningPaths = [];
 let wx, wy, ww, wh;
-let cachedRoomScale, cachedGroundDrawH, cachedGy, cachedCarScale, cachedCatScale;
 
 function generateLightning() {
     const lx = R(wx + Math.random() * ww), ly = R(wy + Math.random() * wh * .3);
@@ -40,18 +39,16 @@ function drawScene() {
     const { W, H, hour, wind } = State;
     const hf = hour + State.minute / 60;
 
-    const newScale = Math.max(W / roomSprite.width, H / roomSprite.height);
-    if (State.frame === 1 || cachedRoomScale !== newScale) {
-        cachedRoomScale = newScale;
-        cachedGroundDrawH = null;
-    }
-    const rs = cachedRoomScale;
-    const roomX = (W - roomSprite.width * rs) / 2, roomY = (H - roomSprite.height * rs) / 2;
+    const rs = Math.max(W / roomSprite.width, H / roomSprite.height);
+    const roomX = (W - roomSprite.width * rs) / 2;
+    const roomY = (H - roomSprite.height * rs) / 2;
 
     roomSprite.draw(DOM.ctx, W, H);
 
-    wx = roomX + CONFIG.WINDOW.x1 * rs; wy = roomY + CONFIG.WINDOW.y1 * rs;
-    ww = (CONFIG.WINDOW.x2 - CONFIG.WINDOW.x1) * rs; wh = (CONFIG.WINDOW.y2 - CONFIG.WINDOW.y1) * rs;
+    wx = roomX + CONFIG.WINDOW.x1 * rs;
+    wy = roomY + CONFIG.WINDOW.y1 * rs;
+    ww = (CONFIG.WINDOW.x2 - CONFIG.WINDOW.x1) * rs;
+    wh = (CONFIG.WINDOW.y2 - CONFIG.WINDOW.y1) * rs;
 
     darkness = 0;
     if (hf < 4) darkness = 1;
@@ -69,25 +66,27 @@ function drawScene() {
 
     const night = darkness > .65;
     const wc = getWeatherCategory(State.conditionCode);
-    const rainy = wc === 'rain' || wc === 'storm', snowy = wc === 'snow';
+    const rainy = wc === 'rain' || wc === 'storm';
+    const snowy = wc === 'snow';
     const showCl = wc === 'cloudy' || wc === 'partly' || rainy || snowy;
 
     let sk;
-    if (rainy) sk = 'rain'; else if (snowy) sk = 'snow'; else if (wc === 'cloudy') sk = 'cloudy';
-    else if (night) sk = 'clear_night'; else if (hf >= 4.5 && hf < 6.5) sk = 'clear_dawn';
-    else if (hf >= 19.5 && hf < 21.5) sk = 'clear_dusk'; else sk = 'clear_day';
+    if (rainy) sk = 'rain';
+    else if (snowy) sk = 'snow';
+    else if (wc === 'cloudy') sk = 'cloudy';
+    else if (night) sk = 'clear_night';
+    else if (hf >= 4.5 && hf < 6.5) sk = 'clear_dawn';
+    else if (hf >= 19.5 && hf < 21.5) sk = 'clear_dusk';
+    else sk = 'clear_day';
 
     sc = CONFIG.SKY_COLORS[sk];
     const ni = night ? 0 : 1;
-    
-    if (!cachedGroundDrawH) {
-        const groundScale = ww / groundSprite.width;
-        cachedGroundDrawH = groundSprite.height * groundScale;
-        cachedGy = wy + wh - cachedGroundDrawH;
-        cachedCarScale = ww / 400;
-        cachedCatScale = ww / 270;
-    }
-    const groundDrawH = cachedGroundDrawH, gy = cachedGy, carScale = cachedCarScale, catScale = cachedCatScale;
+
+    const groundScale = ww / groundSprite.width;
+    const groundDrawH = groundSprite.height * groundScale;
+    const gy = wy + wh - groundDrawH;
+    const carScale = ww / 400;
+    const catScale = ww / 270;
 
     DOM.ctx.save();
     DOM.ctx.beginPath(); DOM.ctx.rect(wx, wy, ww, wh); DOM.ctx.clip();
@@ -106,8 +105,7 @@ function drawScene() {
             const fl = Math.sin(State.frame * s.twinkleSpeed + s.x) * .5 + .5;
             const sx = R(wx + s.x / 100 * ww), sy = R(wy + s.y / 100 * wh);
             const sz = s.brightness * starAlpha > 7 ? CONFIG.PX * 2 : CONFIG.PX;
-            const alpha = starAlpha * (.6 + fl * .4);
-            pixelRect(sx, sy, sz, sz, `rgba(220,230,255,${alpha})`);
+            pixelRect(sx, sy, sz, sz, `rgba(220,230,255,${starAlpha * (.6 + fl * .4)})`);
             if (s.brightness * starAlpha > 5) {
                 const dc = `rgba(200,210,255,${.3 * fl * starAlpha})`;
                 for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) pixelRect(sx + dx * CONFIG.PX, sy + dy * CONFIG.PX, CONFIG.PX, CONFIG.PX, dc);
@@ -166,7 +164,6 @@ function drawScene() {
             const sizes = { small: 0, medium: 1, large: 2 };
             return (sizes[b.type] || 1) - (sizes[a.type] || 1);
         });
-        
         for (const cl of sortedClouds) {
             const cx = R(wx + cl.x * ww + Math.sin(State.frame * .005 * cl.speed + cl.y * 10) * ww * .02);
             const cy = R(wy + cl.y * wh);
@@ -203,7 +200,6 @@ function drawScene() {
             const rx = R(wx + d.x / 100 * ww), ry = R(wy + ((d.y + fall) % 90) / 100 * wh);
             for (let dy = 0; dy < d.len * CONFIG.PX; dy += CONFIG.PX) pixelRect(rx + dy * .3, ry + dy, CONFIG.PX, CONFIG.PX, `rgba(150,180,220,${.3 + dy / (d.len * CONFIG.PX) * .3})`);
         }
-
         if (wc === 'storm' && Math.random() < .01 && lightningFrames === 0) generateLightning();
         if (lightningFrames > 0) {
             lightningFrames--; lightningAlpha = lightningFrames / 4;
@@ -249,41 +245,71 @@ function drawScene() {
 
     DOM.ctx.restore();
 
-    const winX = wx, winY = wy, winW = ww, winH = wh, winBottom = wy + wh;
+    // ===== ЭЛЕМЕНТЫ КОМНАТЫ НА ГЛАВНОМ CANVAS =====
+    
+    // Кот на подоконнике
+    const catW = 120 * catScale;
+    const catH = 48 * catScale;
+    catSprite.draw(DOM.ctx, wx + 10, wy + wh - catH + 175 * rs, catW, catH);
 
-    const catW = 120 * catScale, catH = 48 * catScale;
-    catSprite.draw(DOM.ctx, winX + 10, winBottom - catH + 180 * rs, catW, catH);
+    // Часы (справа внизу)
+    const clockScale = 1;
+    const clockW = 250 * clockScale;
+    const clockH = 100 * clockScale;
+    const clockX = wx + ww - clockW + 220;
+    const clockY = wy + wh - clockH + 130;
+    const clockSpriteImg = SpriteLoader.get('clock');
+    if (clockSpriteImg) clockSpriteImg.draw(DOM.ctx, clockX, clockY, 3.1);
+    DOM.ctx.fillStyle = '#88ccaa';
+    DOM.ctx.font = '19px "Press Start 2P", monospace';
+    DOM.ctx.textAlign = 'center'; DOM.ctx.textBaseline = 'middle';
+    const timeStr = `${String(State.hour).padStart(2,'0')}:${String(State.minute).padStart(2,'0')}:${String(State.second).padStart(2,'0')}`;
+    DOM.ctx.fillText(timeStr, clockX + 125, clockY + 50);
 
-    const clockEl = document.querySelector('.clock');
-    clockEl.style.right = (W - winX - winW - 210) + 'px';
-    clockEl.style.bottom = (H - winBottom + -130) + 'px';
+    // Календарь (слева)
+    const calW = 128;
+    const calH = 192;
+    const calX = wx - 360 * rs;
+    const calY = wy + wh * .23;
+    calendarSprite.draw(DOM.ctx, calX, calY, calW, calH);
+    DOM.ctx.fillStyle = '#666'; DOM.ctx.font = '10px "Press Start 2P", monospace';
+    DOM.ctx.textAlign = 'center'; DOM.ctx.fillText(CONFIG.MONTHS[State.month-1], calX + 64, calY + 70);
+    DOM.ctx.fillStyle = '#2a2a3d'; DOM.ctx.font = '36px "Press Start 2P", monospace';
+    DOM.ctx.fillText(State.day, calX + 64, calY + 110);
+    DOM.ctx.fillStyle = '#555'; DOM.ctx.font = '10px "Press Start 2P", monospace';
+    DOM.ctx.fillText(State.weekday, calX + 64, calY + 143);
 
-    const calEl = document.querySelector('.calendar-wall');
-    calEl.style.left = (winX - 357 * rs) + 'px';
-    calEl.style.top = (winY + winH * .23) + 'px';
+    // Выключатель (справа)
+    const swW = 96;
+    const swH = 96;
+    const swX = wx + ww + 100 * rs;
+    const swY = wy + wh * .48;
+    switchSprite.draw(DOM.ctx, swX, swY, swW, swH);
 
-    const switchEl = document.querySelector('.light-switch');
-    switchEl.style.right = (W - winX - winW - 220 * rs) + 'px';
-    switchEl.style.top = (winY + winH * .48) + 'px';
-
+    // Затемнение комнаты кроме окна
     if (darkness > 0.1) {
         const lm = switchSprite.state ? 0.3 : 1;
         DOM.ctx.save();
         DOM.ctx.beginPath();
         DOM.ctx.rect(0, 0, W, H);
-        DOM.ctx.rect(winX, winY, winW, winH);
+        DOM.ctx.rect(wx, wy, ww, wh);
         DOM.ctx.clip('evenodd');
         DOM.ctx.fillStyle = `rgba(5, 5, 25, ${(darkness - 0.1) * 0.5 * lm})`;
         DOM.ctx.fillRect(0, 0, W, H);
         DOM.ctx.restore();
     }
 
-    const overlay = document.getElementById('lightOverlay');
-    if (overlay) overlay.classList.toggle('on', switchSprite.state);
-
-    const lm = switchSprite.state ? 0.3 : 1;
-    const filterVal = darkness > 0.1 ? `brightness(${1 - (darkness - 0.1) * 0.6 * lm})` : 'brightness(1)';
-    clockEl.style.filter = filterVal;
-    calEl.style.filter = filterVal;
-    switchEl.style.filter = filterVal;
+    // Свет
+    if (switchSprite.state) {
+        DOM.ctx.fillStyle = 'rgba(255,220,170,0.06)';
+        DOM.ctx.fillRect(0, 0, W, H);
+        for (const [gx, gy2] of [[0, 0], [W, 0]]) {
+            const lg = DOM.ctx.createRadialGradient(gx, gy2, 0, gx, gy2, W * .6);
+            lg.addColorStop(0, 'rgba(255,240,200,0.15)');
+            lg.addColorStop(0.3, 'rgba(255,220,160,0.08)');
+            lg.addColorStop(0.6, 'rgba(255,200,120,0.03)');
+            lg.addColorStop(1, 'rgba(255,180,80,0)');
+            DOM.ctx.fillStyle = lg; DOM.ctx.fillRect(0, 0, W, H);
+        }
+    }
 }
