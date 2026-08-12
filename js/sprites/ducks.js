@@ -5,6 +5,7 @@ const ducksSprite = {
     width: 11,
     height: 9,
     ducks: [],
+    initializedWw: null,
     
     async loadAll() {
         await new Promise(resolve => {
@@ -16,22 +17,23 @@ const ducksSprite = {
     },
     
     init(ww, gy) {
+        this.initializedWw = ww;
         this.ducks = [];
-        const minDist = 8;
-        const maxAttempts = 100;
+        const minDistance = 5;
+        const maxAttempts = 50;
         
         for (let i = 0; i < 3; i++) {
-            let x, y, attempts = 0;
+            let y, attempts = 0;
             do {
-                x = ww * 0.24 + Math.random() * ww * 0.12;
-                y = gy + 250 + Math.random() * 30;
+                y = gy + 255 + Math.random() * 30;
                 attempts++;
                 if (attempts > maxAttempts) break;
-            } while (this.ducks.some(d => Math.abs(d.x - x) < minDist || Math.abs(d.y - y) < minDist));
+            } while (this.ducks.some(d => Math.abs(d.y - y) < minDistance));
             
             this.ducks.push({
                 size: 0.7 + Math.random() * 0.6,
-                x, y,
+                x: ww * 0.24 + Math.random() * ww * 0.12,
+                y: y,
                 speed: 0.02 + Math.random() * 0.05,
                 direction: Math.random() > 0.5 ? 1 : -1
             });

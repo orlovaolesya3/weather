@@ -185,7 +185,9 @@ function drawScene() {
     groundSprite.draw(DOM.ctx, wx, gy, ww, groundDrawH);
     treesSprite.draw(DOM.ctx, wind, wx, gy, ww, groundDrawH);
 
-    if (State.frame === 1) ducksSprite.init(ww, gy);
+    if (State.frame === 1 || !ducksSprite.initializedWw || Math.abs(ducksSprite.initializedWw - ww) > 10) {
+        ducksSprite.init(ww, gy);
+    }
     if (State.frame % 4 === 0) ducksSprite.update(ww);
     ducksSprite.draw(DOM.ctx, wx, wy, ww, wh, gy, carScale);
 
